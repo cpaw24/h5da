@@ -7,5 +7,3 @@ for input_file in input_files:
 	file_name = input_file.split('/')[-1].split('.')[0]
 	de = H5DataExtractor(output_file=f"data_{file_name}.h5", input_file=input_file, input_dict={})
 
-
-
