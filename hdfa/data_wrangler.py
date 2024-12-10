@@ -7,18 +7,27 @@ import json
 import csv
 
 
-class H5DataFileCreator:
-	def __init__(self, output_file: AnyStr) -> None:
-		self.output_file = output_file
-		self.h5_file = h5.File(self.output_file, 'w', libver='latest',
-		                       meta_block_size=8388608, locking=True, driver='core')
+class H5FileCreator:
 
-class H5DataExtractor:
-	def __init__(self, output_file: AnyStr,  input_file: AnyStr, input_dict: Dict | np.ndarray) -> None:
-		self.input_file = input_file
-		self.input_dict = input_dict
+	def __init__(self, output_file: AnyStr, write_mode: AnyStr) -> None:
 		self.output_file = output_file
-		self.h5_file = H5DataFileCreator(output_file=self.output_file)
+		self.write_mode = write_mode
+
+	def create_file(self) -> h5.File:
+		h5_file = h5.File(self.output_file, mode=self.write_mode, libver='latest',
+		                       meta_block_size=8388608, locking=True, driver='core')
+		return h5_file
+
+
+class H5DataCreator:
+	def __init__(self, output_file: AnyStr, input_file: AnyStr, input_dict: Dict | np.ndarray) -> None:
+		self.__input_file = input_file
+		self.__input_dict = input_dict
+		self.__output_file = output_file
+		self.__h5_file = H5FileCreator(output_file=self.__output_file, write_mode='w').create_file()
+		self.input_processor(
+			input_file=self.__input_file
+		)
 
 	def __parse_data(self, input_dict: Dict | np.ndarray) -> List:
 		value_list: List = []
@@ -71,22 +80,55 @@ class H5DataExtractor:
 
 			return contents, processed_file_list
 
-	def input_processor(self, input_file: AnyStr, h5_file: h5.File) -> h5.File.keys:
-		content, file_list = self.__dataset_content(input_file)
+	def input_processor(self, input_file: AnyStr) -> h5.File.keys:
+		content, file_list = self.__dataset_content(input_file=input_file)
 		for line, file_nm in zip(content, file_list):
 			file_group = file_nm.split('.')[0]
-			h5_file.create_group(file_group)
+			self.__h5_file.create_group(file_group)
 			if isinstance(content, Dict):
 				data = json.loads(line)
-				kv_list = self.__parse_data(data)
+				kv_list = self.__parse_data(input_dict=data)
 				for kv in kv_list:
 					k, v = kv
 					if isinstance(v, np.ndarray):
-						h5_file[f'{file_group}'].create_dataset(k, data=v, compression='gzip')
+						self.__h5_file[f'{file_group}'].create_dataset(k, data=v, compression='gzip')
 					elif isinstance(v, str | np.array):
-						h5_file[f'{file_group}'].attrs[k] = v
+						self.__h5_file[f'{file_group}'].attrs[k] = v
 			elif isinstance(content, np.ndarray):
-				h5_file[f'{file_group}'].create_dataset(f'{file_group}/images', data=content, compression='gzip')
+				self.__h5_file[f'{file_group}'].create_dataset(f'{file_group}/images', data=content, compression='gzip')
 
-			return h5_file.keys(), h5_file.filename
+			return self.__h5_file.keys(), self.__h5_file.filename
 
+
+class H5DataRetriever:
+	def __init__(self, input_file: h5.File, group_list: List,  dataset_list: List) -> None:
+		self.__input_file = input_file
+		self.__group_list = group_list
+		self.__dataset_list = dataset_list
+		self.__h5_file = h5.File(self.__input_file, 'r', libver='latest', locking=True, driver='core')
+
+	def retrieve_data(self) -> tuple[List, List]:
+		file = self.__h5_file
+		group_data_list: List = []
+		dataset_data_list: List = []
+
+		for __group in self.__group_list:
+			__group = file.require_group(__group)
+			__group_data = file.get(__group)
+			group_data_list.append(__group_data)
+
+		for __dataset in self.__dataset_list:
+			if group_data_list:
+				for group in group_data_list:
+					__dataset_group = file.require_group(group)
+			else:
+				__dataset_group = file.require_group(__dataset)
+
+				if __dataset_group:
+					__dataset_data = __dataset_group.get(__dataset)
+					dataset_data_list.append(__dataset_data)
+				else:
+					__dataset_data = file.get(__dataset)
+					dataset_data_list.append(__dataset_data)
+
+			return group_data_list, dataset_data_list
