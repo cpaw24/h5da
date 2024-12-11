@@ -1,5 +1,4 @@
 import os
-from pypdf import PdfReader
 import h5py as h5
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
@@ -31,9 +30,6 @@ class H5DataCreator:
 		self.__input_dict = input_dict
 		self.__output_file = output_file
 		self.__h5_file = H5FileCreator(output_file=self.__output_file, write_mode='w').create_file()
-		self.input_processor(
-			input_file=self.__input_file
-		)
 
 	def random_int_generator(self) -> int:
 		random_int = random.randint(1, 10000)
@@ -106,8 +102,8 @@ class H5DataCreator:
 
 			return content_list, processed_file_list
 
-	def input_processor(self, input_file: AnyStr) -> tuple[h5.File.keys, h5.File.filename]:
-		content_list, file_list = self.__open_zip(input_file)
+	def input_processor(self) -> tuple[h5.File.keys, h5.File.filename]:
+		content_list, file_list = self.__open_zip(self.__input_file)
 		for line, file_nm in zip(content_list, file_list):
 			file_group = file_nm.split('.')[0]
 			self.__h5_file.create_group(file_group)
