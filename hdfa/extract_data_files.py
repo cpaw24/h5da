@@ -5,5 +5,5 @@ input_files = ["//Volumes//ExtShield//datasets//archive.zip",
 
 for input_file in input_files:
 	file_name = input_file.split('/')[-1].split('.')[0]
-	de = H5DataCreator.input_processor(input_file=input_file)
+	de = H5DataCreator(input_file=input_file, input_dict={}, output_file=f"{file_name}_filestore.h5").input_processor(input_file)
 

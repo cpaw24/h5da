@@ -1,10 +1,16 @@
+import os
+from pypdf import PdfReader
 import h5py as h5
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
 from zipfile import ZipFile
 from typing import AnyStr, Dict, List
 import numpy as np
 from PIL import Image
+import tifffile
 import json
 import csv
+import random
 
 
 class H5FileCreator:
@@ -29,6 +35,10 @@ class H5DataCreator:
 			input_file=self.__input_file
 		)
 
+	def random_int_generator(self) -> int:
+		random_int = random.randint(1, 10000)
+		return random_int
+
 	def __parse_data(self, input_dict: Dict | np.ndarray) -> List:
 		value_list: List = []
 		if isinstance(input_dict, Dict):
@@ -51,53 +61,70 @@ class H5DataCreator:
 		return value_list
 
 	def __file_list(self, input_file: AnyStr) -> List:
-		with ZipFile(input_file) as zip:
+		with ZipFile(input_file, 'r') as zip:
 			file_list = zip.namelist()
 			return file_list
 
-	def __open_zip(self, input_file: AnyStr) -> List:
-		with ZipFile.open(name=input_file, mode='r') as zip:
-			if input_file.endswith('.json'):
-				content = zip.read().decode('utf-8').rstrip().splitlines()
-			elif input_file.endswith('.jpg' or '.jpeg' or '.png' or '.bmp' or '.tiff' or '.svg'):
-				img = Image.open(zip)
-				data = np.array(img)
-				content = self.__parse_data(data)
+	def __open_zip(self, input_file: AnyStr) -> tuple[List, List]:
+		with ZipFile(input_file, 'r') as zip:
+			content_list: List = []
+			file_list = self.__file_list(input_file)
+			processed_file_list: List[str] = []
+			for file in file_list:
+				if file.endswith('.json'):
+					raw_content = zip.read(file).decode('utf-8').rstrip().splitlines()
+					for row in raw_content:
+						row_dict = json.loads(row)
+						content_list.append(row_dict)
+					processed_file_list.append(file)
 
-				return content
+				elif file.endswith('.jpg' or '.jpeg' or '.png' or '.bmp' or '.tiff'):
+					if file.endswith('.tiff'):
+						img = tifffile.imread(file)
+						content_list.append(img)
+					else:
+						img = Image.open(file)
+						data = np.array(img)
+						content_list.append(data)
+					processed_file_list.append(file)
 
-	def __dataset_content(self, input_file: AnyStr) -> tuple[List, List]:
-		processed_file_list: List = []
-		file_list = self.__file_list(input_file)
-		for file in file_list:
-			processed_file_list.append(file)
-			contents = self.__open_zip(file)
+				elif file.endswith('.svg'):
+					temp_img = f"{self.random_int_generator()}_temp.png"
+					drawing = svg2rlg(file)
+					renderPM.drawToFile(drawing, f"{temp_img}", fmt='png')
+					img = Image.open(f'{temp_img}')
+					img_array = np.array(img)
+					content_list.append(img_array)
+					processed_file_list.append(file)
+					os.remove(temp_img)
 
-			if file.endswith('.csv'):
-				processed_file_list.append(file)
-				with csv.reader(file, 'r', delimiter=",", quotechar="") as datafile:
-					contents = datafile.read().decode('utf-8')
+				elif file.endswith('.csv'):
+					with csv.reader(file, 'r', delimiter=",", quotechar="") as datafile:
+						content = datafile.read().decode('utf-8')
+						content_list.append(content)
+						processed_file_list.append(file)
 
-			return contents, processed_file_list
+			return content_list, processed_file_list
 
-	def input_processor(self, input_file: AnyStr) -> h5.File.keys:
-		content, file_list = self.__dataset_content(input_file=input_file)
-		for line, file_nm in zip(content, file_list):
+	def input_processor(self, input_file: AnyStr) -> tuple[h5.File.keys, h5.File.filename]:
+		content_list, file_list = self.__open_zip(input_file)
+		for line, file_nm in zip(content_list, file_list):
 			file_group = file_nm.split('.')[0]
 			self.__h5_file.create_group(file_group)
-			if isinstance(content, Dict):
-				data = json.loads(line)
-				kv_list = self.__parse_data(input_dict=data)
+			if isinstance(line, Dict):
+				kv_list = self.__parse_data(input_dict=line)
 				for kv in kv_list:
 					k, v = kv
 					if isinstance(v, np.ndarray):
 						self.__h5_file[f'{file_group}'].create_dataset(k, data=v, compression='gzip')
-					elif isinstance(v, str | np.array):
+					elif isinstance(v, str or np.array):
 						self.__h5_file[f'{file_group}'].attrs[k] = v
-			elif isinstance(content, np.ndarray):
-				self.__h5_file[f'{file_group}'].create_dataset(f'{file_group}/images', data=content, compression='gzip')
+			elif isinstance(line, np.ndarray):
+				self.__h5_file[f'{file_group}'].create_dataset(f'{file_group}/images', data=line, compression='gzip')
+			else:
+				self.__h5_file.file.close()
 
-			return self.__h5_file.keys(), self.__h5_file.filename
+		return self.__h5_file.keys(), self.__h5_file.filename
 
 
 class H5DataRetriever:
@@ -132,3 +159,4 @@ class H5DataRetriever:
 					dataset_data_list.append(__dataset_data)
 
 			return group_data_list, dataset_data_list
+
