@@ -1,5 +1,9 @@
+import multiprocessing
 import os
 import logging
+
+from setuptools.package_index import local_open
+
 from mpLocal import mpQLocal
 import h5py as h5
 from svglib.svglib import svg2rlg
@@ -37,6 +41,7 @@ class H5DataCreator:
 		self.__input_file = input_file
 		self.__output_file = output_file
 		self.__input_dict = input_dict
+
 		# Initialize logger for this class
 		self.__logger = logging.getLogger(__name__)
 		self.__h5_file = self.__initialize_h5_file
@@ -61,17 +66,51 @@ class H5DataCreator:
 	def __write_content_to_file(self) -> None:
 		self.__h5_file.flush()
 
+	def __convert_images(self, local_q_process: multiprocessing.Process, file: AnyStr,
+	                     open_file: ZipFile | h5.File | gzip.GzipFile, content_list: List, processed_file_list: List[str]):
+		image_extensions = ('jpg', 'jpeg', 'png', 'bmp', 'tiff')
+		local_process = mpQLocal()
+		local_process.join_mp_process(local_q_process)
+		try:
+			if file.endswith(image_extensions):
+				ds = file.split('/')[0]
+				if file.endswith('tiff'):
+					img = tifffile.imread(file)
+				else:
+					with open_file.open(file) as img_file:
+						img = np.array(Image.open(img_file))
+				content_list.append([ds, img])
+				processed_file_list.append(file)
+				local_process.send_data(local_q_process, [content_list, processed_file_list])
+			# Process SVG files (Convert to numpy array via PNG generation)
+			elif file.endswith('svg'):
+				ds = file.split('/')[0]
+				temp_img = f"{self.random_int_generator()}_temp.png"
+				try:
+					drawing = svg2rlg(open_file.open(file))
+					renderPM.drawToFile(drawing, temp_img, fmt='PNG')
+					img = np.array(Image.open(temp_img))
+					content_list.append([ds, img])
+					processed_file_list.append(file)
+					local_process.send_data(local_q_process, [content_list, processed_file_list])
+				finally:
+				# Ensure temp file is removed, even in case of failures.
+					if os.path.exists(temp_img):
+						os.remove(temp_img)
+		except Exception as e:
+			print(e)
+			self.__logger.error(f"Error processing file {file}: {e}")
+
 	def __classify_inputs(self, file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile) -> Tuple:
 		"""Classify and process input files content into structured data formats."""
 		content_list: List = []
 		processed_file_list: List[str] = []
-		logger = logging.getLogger(__name__)
+		# Use multiprocessing and queues for large image lists
 		local_process = mpQLocal()
 		local_q_process, process_q = local_process.setup_mp_process()
-		process_join = local_process.join_mp_process(local_q_process)
+		local_process.join_mp_process(local_q_process)
 
 		image_extensions = ('jpg', 'jpeg', 'png', 'bmp', 'tiff')
-		# for file in file_list:
 		try:
 			# Process JSON files
 			if file.endswith('json'):
@@ -83,34 +122,9 @@ class H5DataCreator:
 				line_count = len(content_list)
 				processed_file_list.append(file_name + '-' + str(line_count))
 				local_process.send_data(local_q_process,[content_list, processed_file_list])
-			# Process image files (JPEG, PNG, BMP, TIFF)
+			# Process image files
 			elif file.endswith(image_extensions):
-				ds = file.split('/')[0]
-				if file.endswith('tiff'):
-					img = tifffile.imread(file)
-				else:
-					with open_file.open(file) as img_file:
-						img = Image.open(img_file)
-						img = np.array(img)
-				content_list.append([ds, img])
-				processed_file_list.append(file)
-				local_process.send_data(local_q_process, [content_list, processed_file_list])
-			# Process SVG files (Convert to numpy array via PNG generation)
-			elif file.endswith('svg'):
-				ds = file.split('/')[0]
-				temp_img = f"{self.random_int_generator()}_temp.png"
-				try:
-					drawing = svg2rlg(open_file.open(file))
-					renderPM.drawToFile(drawing, temp_img, fmt='PNG')
-					img = Image.open(temp_img)
-					img_array = np.array(img)
-					content_list.append([ds, img_array])
-					processed_file_list.append(file)
-					local_process.send_data(local_q_process, [content_list, processed_file_list])
-				finally:
-					# Ensure temp file is removed, even in case of failures.
-					if os.path.exists(temp_img):
-						os.remove(temp_img)
+				self.__convert_images(local_q_process, file, open_file, content_list, processed_file_list)
 			# Process CSV files
 			elif file.endswith('csv'):
 				with open_file.open(file) as csv_file:
@@ -123,6 +137,7 @@ class H5DataCreator:
 
 		except Exception as e:
 			self.__logger.getLogger(__name__).error(f"Error processing file {file}: {e}")
+			print(e)
 
 		return local_process, local_q_process
 
@@ -181,8 +196,8 @@ class H5DataCreator:
 
 	def __open_h5(self) -> Tuple[List, List]:
 		h5file = self.__input_file.h5.open().read().decode('utf-8')
-		content, processed_file_list = self.__classify_inputs(h5file, h5file)
-		return content, processed_file_list
+		process, local_q = self.__classify_inputs(h5file, h5file)
+		return process, local_q
 
 	def __open_gzip(self) -> Tuple[List, List]:
 		gzfile = gzip.open(self.__input_file, 'r', encoding='utf-8')
@@ -196,7 +211,7 @@ class H5DataCreator:
 			process, local_q = self.__open_zip()
 			return process, local_q
 		elif self.__input_file.endswith('h5' or 'hdf5'):
-			process, local_q, file_list = self.__open_h5()
+			process, local_q = self.__open_h5()
 			return process, local_q
 		elif self.__input_file.endswith('gz' or 'gzip'):
 			process, local_q = self.__open_gzip()
@@ -213,10 +228,10 @@ class H5DataCreator:
 				content_list = [self.__input_dict]
 				file_list: List = []
 
-			for data in process.recv_data(local_q):
-				content_list, file_list = data
-				for contents, files in content_list, file_list:
-					if len(file_list) > 1:
+			if process and local_q:
+				for data in process.recv_data(local_q):
+					content_list, file_list = data
+					for contents, files in content_list, file_list:
 						for file_group, content_lines in contents:
 							if not self.__h5_file.get(file_group):
 								self.__h5_file.create_group(file_group, track_order=True)
@@ -234,27 +249,36 @@ class H5DataCreator:
 									print("write root attrs")
 									self.__write_content_to_file()
 
-								for file, line in content_list:
-									if isinstance(line, Dict):
-										list_count = 0
-										kv_list = self.__parse_data(input_dict=line)
-										kva = np.array(kv_list, dtype=np.dtype('S'))
-										print(kva)
-										idx = list_count
-										self.__h5_file.require_group(file_group).attrs[f'{idx}'] = kva
-										self.__write_content_to_file()
-										print("write attrs")
-										list_count += 1
+					for file, line in content_list:
+						if isinstance(line, Dict):
+							list_count = 0
+							kv_list = self.__parse_data(input_dict=line)
+							kva = np.array(kv_list, dtype=np.dtype('S'))
+							print(kva)
+							idx = list_count
+							self.__h5_file.require_group(file_group).attrs[f'{idx}'] = kva
+							self.__write_content_to_file()
+							print("write attrs")
+							list_count += 1
 
-							elif isinstance(line, np.ndarray):
-								if self.__h5_file.get(f'{file_group}'):
-									self.__h5_file[f'{file_group}'].create_dataset(f'{file_group}', data=line,
-									                                               compression='gzip',
-									                                               chunks=True)
-									print("write ndarray")
-									self.__write_content_to_file()
-							else:
+						elif isinstance(line, np.ndarray):
+							if self.__h5_file.get(f'{file_group}'):
+								self.__h5_file[f'{file_group}'].create_dataset(f'{file_group}', data=line,
+								                                               compression='gzip',
+								                                               chunks=True)
+								print("write ndarray")
 								self.__write_content_to_file()
+						else:
+							self.__write_content_to_file()
+
+			elif content_list and file_list:
+				for contents, files in content_list:
+					for file_group, content_lines in contents:
+						if not self.__h5_file.get(file_group):
+							self.__h5_file.create_group(file_group, track_order=True)
+							self.__h5_file[file_group].attrs['file_name'] = file_group
+							self.__h5_file[file_group].attrs['content_list_length'] = len(content_list)
+							print("write file group attrs")
 
 		except Exception as e:
 			self.__h5_file.flush()
@@ -271,7 +295,7 @@ class H5DataRetriever:
 		self.__input_file = input_file
 		self.__group_data_list = group_list
 		self.__dataset_data_list = dataset_list
-		self.__h5_file = h5.File(self.__input_file, 'r', libver='latest', locking=True, driver='stdio')
+		self.__h5_file = h5.File(self.__input_file, 'r', libver='latest', locking=True, driver='None')
 
 	def recursive_retrieval(self) -> Dict | h5.Dataset | None:
 		if self.__group_data_list:
@@ -286,7 +310,7 @@ class H5DataRetriever:
 			else:
 				return {k: v for k, v in h5.Group(target).attrs.items()}
 
-	def retrieve_all_data(self) -> Tuple[List, List]:
+	def retrieve_all_data_lists(self) -> Tuple[List, List]:
 		group_data_list = [self.__h5_file[name] for name in self.__h5_file if
 		                   isinstance(self.__h5_file[name], h5.Group)]
 		dataset_data_list = [self.__h5_file[name] for name in self.__h5_file if
@@ -298,7 +322,6 @@ class H5DataRetriever:
 		groups = self.retrieve_group_list()
 		for g in groups:
 			attrs_list.append(self.__h5_file[g].attrs.items())
-
 		return attrs_list
 
 	def retrieve_group_list(self) -> List:
