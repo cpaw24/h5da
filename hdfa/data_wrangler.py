@@ -34,7 +34,6 @@ class H5DataCreator:
         :param input_file: Path to the input file (e.g., .zip, .gz).
         :param input_dict: Optional dictionary or ndarray to process and store in the HDF5 file.
         """
-
 		self.__input_file = input_file
 		self.__output_file = output_file
 		self.__input_dict = input_dict
@@ -51,7 +50,6 @@ class H5DataCreator:
 	def __initialize_h5_file(self) -> h5.File:
 		"""
         Creates or appends to the HDF5 file depending on whether it exists.
-
         :return: An HDF5 file object.
         """
 		return H5FileCreator(output_file=self.__output_file, write_mode='a').create_file()
@@ -226,6 +224,7 @@ class H5DataCreator:
 								self.__h5_file[file_group].attrs['content_list_length'] = len(content_list)
 								print("write file group attrs")
 								self.__write_content_to_file()
+
 							elif not file_list:
 								file_group = 'root'
 								if not self.__h5_file.get(file_group):
@@ -246,45 +245,12 @@ class H5DataCreator:
 										self.__write_content_to_file()
 										print("write attrs")
 										list_count += 1
-							# for k, v in kv_list:
-							# 	idx = content_list.index(line)
-							# 	idx_str = str(idx)
-							# 	if not self.__h5_file.visit(file_group).get(idx_str):
-							# 		current_group = self.__h5_file[file_group].require_group(idx_str)
-							# 	elif self.__h5_file.visit(file_group).get(idx_str):
-							# 		current_group = self.__h5_file[file_group].require_group(idx_str)
-							#
-							# 	if isinstance(v, np.ndarray):
-							# 		current_group.create_dataset(k, data=v, compression='gzip', chunks=False)
-							# 		self.__write_content_to_file()
-							# 		print("write ndarray")
-							#
-							# 	elif isinstance(v, List):
-							# 		if isinstance(v[0],  str):
-							# 			v = np.ndarray(([x for x in v if v is not None], h5.string_dtype(encoding='utf-8')))
-							# 		elif isinstance(v[0], int):
-							# 			v = np.ndarray[v]
-							# 		current_group.create_dataset(k, data=v, compression='gzip', chunks=False)
-							# 		print("write ndarray list")
-							# 		self.__write_content_to_file()
-
-								# elif isinstance(v, int | str):
-								# 	if current_group.get(k):
-								# 		v = np.ndarray(v, dtype=np.dtype('S'))
-								# 		current_group.create_dataset(f'{k + '_' + idx_str}', data=v, compression='gzip',
-								# 		                           chunks=False)
-								# 		print("write ndarray int or str")
-								# 		self.__write_content_to_file()
-								# 	else:
-								# 		v = np.ndarray(v, dtype=np.dtype('S'))
-								# 		current_group.create_dataset(k, data=v, compression='gzip', chunks=False)
-								# 		print("write ndarray int or str")
-								# 		self.__write_content_to_file()
 
 							elif isinstance(line, np.ndarray):
 								if self.__h5_file.get(f'{file_group}'):
-									self.__h5_file[f'{file_group}'].create_dataset(f'{file_group}', data=line, compression='gzip',
-									                                                chunks=True)
+									self.__h5_file[f'{file_group}'].create_dataset(f'{file_group}', data=line,
+									                                               compression='gzip',
+									                                               chunks=True)
 									print("write ndarray")
 									self.__write_content_to_file()
 							else:
