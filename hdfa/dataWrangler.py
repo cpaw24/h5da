@@ -2,7 +2,7 @@ import multiprocessing
 import os
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from fileWrangler import fileHandler
+from fileWrangler import fileHandler, H5FileCreator
 import numpy as np
 import h5py as h5
 from svglib.svglib import svg2rlg
@@ -16,17 +16,6 @@ import csv
 import random
 import gzip
 
-
-
-class H5FileCreator:
-
-    def __init__(self, output_file: AnyStr, write_mode: AnyStr = 'a') -> None:
-        self.__output_file = output_file
-        self.__write_mode = write_mode
-
-    def create_file(self) -> h5.File:
-        __h5_file = h5.File(self.__output_file, mode=self.__write_mode, libver='latest', locking=True, driver='stdio')
-        return __h5_file
 
 class H5DataCreator:
     def __init__(self, output_file: AnyStr, input_file: AnyStr,
@@ -58,7 +47,7 @@ class H5DataCreator:
         Creates or appends to the HDF5 file depending on whether it exists.
         :return: An HDF5 file object.
         """
-        return H5FileCreator(output_file=self.__output_file, write_mode='a').create_file()
+        return H5FileCreator(output_file=self.__output_file, write_mode='w').create_file()
 
     def random_int_generator(self) -> str:
         random_int = random.randint(1, 1000000)
