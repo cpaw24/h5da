@@ -1,7 +1,7 @@
 from collections.abc import KeysView, ValuesView, ItemsView
-from hdfa.data_wrangler import H5DataCreator
+from hdfa.dataWrangler import H5DataCreator
 import h5py as h5
-from hdfa.data_wrangler import H5DataRetriever
+from hdfa.dataRetriever import H5DataRetriever
 
 #["//Volumes//ExtShield//datasets//archive.zip"] #,
 input_files = ["//Volumes//ExtShield//datasets//fashion-dataset.zip"]
