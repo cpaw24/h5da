@@ -1,8 +1,6 @@
 import multiprocessing
 import os
 import logging
-
-
 from mpLocal import mpQLocal
 import h5py as h5
 from svglib.svglib import svg2rlg
@@ -111,6 +109,8 @@ class H5DataCreator:
 
 		image_extensions = ('jpg', 'jpeg', 'png', 'bmp', 'tiff')
 		try:
+			if file.endswith('/'):
+				self.__h5_file.create_group(file)
 			# Process JSON files
 			if file.endswith('json'):
 				file_name = file.casefold()
