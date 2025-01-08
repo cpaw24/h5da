@@ -1,44 +1,47 @@
-from multiprocessing import Process, Manager
-from typing import List, Dict, Tuple
+from multiprocessing import Process, Manager, Queue
+from typing import List, Tuple, Type
+
 
 class mpQLocal:
+	"""
+	Creates multiprocessing queue object, and methods to send/receive data.
+	"""
 	def __init__(self):
+		self.__manager = Manager
+		self.__queue = Queue()
 		self.Process = Process
+		self.Process(
+			target=self.send_data,
+			args=(self.__queue, ["Queue Open"])).start()
+		super().__init__()
 
-	def __setup_mp(self) -> Manager:
-		manager = Manager()
-		return manager
-
-	def __setup_mp_queue(self) -> Manager.Queue:
-		manager = self.__setup_mp()
-		queue = manager.Queue()
+	def __setup_mp_queue(self) -> Queue:
+		queue = self.__manager.Queue()
 		return queue
 
-	def setup_mp_process(self) -> Tuple[Process, Manager.Queue]:
-		q = self.__setup_mp_queue()
-		p = self.Process(target=q)
-		pr = self.start_mp_process(p)
-		return pr, q
+	def get_context(self) -> Type:
+		return self.get_context('spawn')
 
-	def start_mp_process(self, p: Process) -> Process:
-		p.start()
-		return p
+	def get_queue(self) -> Queue:
+		return self.__queue
 
-	def join_mp_process(self, p: Process) -> Process:
-		p.join()
-		return p
+	def get_manager(self) -> Manager:
+		return self.__manager
 
-	def terminate_mp_process(self, p: Process) -> Process:
-		p.terminate()
-		return p
+	def get_process(self) -> Process:
+		return self.Process
 
-	def send_data(self, q: Manager.Queue, data: List) -> Manager.Queue:
-		q.put(data)
-		return q
+	def join_mp_process(self, p: Process) -> None:
+		return p.join()
 
-	def recv_data(self, q: Manager.Queue) -> List:
-		data = q.get()
-		return data
+	def send_data(self, q: Queue, data: List):
+		return q.put(data)
 
-	def mp_queue_empty(self, q: Manager.Queue):
+	def recv_data(self, q: Queue) -> List:
+		return q.get()
+
+	def mp_queue_empty(self, q: Queue):
 		return q.empty()
+
+	def terminate_mp_process(self, p: Process) -> None:
+		return self.Process.terminate(p)
