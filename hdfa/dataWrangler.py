@@ -33,7 +33,7 @@ class H5DataCreator:
         Initialize the H5DataCreator class.
 
         :param output_file: Path to the output HDF5 file.
-        :param input_file: Path to the input file (e.g., .zip, .gz).
+        :param input_file: Path to the input file (e.g., .zip, .gz, .h5).
         :param input_dict: Optional dictionary or ndarray to process and store in the HDF5 file.
         """
 		self.__input_file = input_file
@@ -85,15 +85,34 @@ class H5DataCreator:
 			processed_file_list.append(file)
 			return content_list, processed_file_list
 
-	def __process_file_groups(self):
-		pass
+	def __process_svg(self, file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile,
+	                  content_list: List, processed_file_list: List[str]):
+		ds = file.split('/')[0]
+		temp_img = f"{self.random_int_generator()}_temp.png"
+		try:
+			drawing = svg2rlg(open_file.open(file))
+			renderPM.drawToFile(drawing, temp_img, fmt='PNG')
+			img = np.array(Image.open(temp_img))
+			content_list.append([ds, img])
+			processed_file_list.append(file)
+			return content_list, processed_file_list
+
+		except Exception as e:
+			print(e)
+			self.__logger.error(f"Error processing file {file}: {e}")
+			if os.path.exists(temp_img):
+				os.remove(temp_img)
+		finally:
+			# Ensure temp file is removed.
+			if os.path.exists(temp_img):
+				os.remove(temp_img)
 
 	def __create_file_group(self, group_name: AnyStr) -> Tuple:
 		created = self.__h5_file.get(group_name)
 		if not created:
 			self.__h5_file.create_group(group_name, track_order=True)
 			self.__write_content_to_file()
-			return 0, 0
+			return (0, 0)
 
 	def __convert_images(self,  process_q: multiprocessing.Queue, file: AnyStr,
 	                     open_file: ZipFile | h5.File | gzip.GzipFile, content_list: List, processed_file_list: List[str]):
@@ -103,6 +122,9 @@ class H5DataCreator:
 				ds = file.split('/')[0]
 				if file.endswith('tiff'):
 					img = tifffile.imread(file)
+					content_list.append([ds, img])
+					processed_file_list.append(file)
+					process_q.put([content_list, processed_file_list])
 				else:
 					with open_file.open(file) as img_file:
 						with ThreadPoolExecutor(max_workers=6) as executor:
@@ -112,19 +134,14 @@ class H5DataCreator:
 						process_q.put([content_list, processed_file_list])
 			# Process SVG files (Convert to numpy array via PNG generation)
 			elif file.endswith('svg'):
-				ds = file.split('/')[0]
-				temp_img = f"{self.random_int_generator()}_temp.png"
 				try:
-					drawing = svg2rlg(open_file.open(file))
-					renderPM.drawToFile(drawing, temp_img, fmt='PNG')
-					img = np.array(Image.open(temp_img))
-					content_list.append([ds, img])
-					processed_file_list.append(file)
+					content_list, processed_file_list = self.__process_svg(file, open_file,
+					                                                       content_list, processed_file_list)
 					process_q.put([content_list, processed_file_list])
-				finally:
-				# Ensure temp file is removed, even in case of failures.
-					if os.path.exists(temp_img):
-						os.remove(temp_img)
+				except Exception as e:
+					print(e)
+					self.__logger.error(f"Error processing file {file}: {e}")
+
 		except Exception as e:
 			print(e)
 			self.__logger.error(f"Error processing file {file}: {e}")
@@ -150,18 +167,21 @@ class H5DataCreator:
 					return content_list, processed_file_list
 			# Process JSON files
 			if file.endswith('json'):
-				content_list, processed_file_list = self.__process_json(file, open_file, content_list, processed_file_list)
+				content_list, processed_file_list = self.__process_json(file, open_file,
+				                                                        content_list, processed_file_list)
 				process_q.put([content_list, processed_file_list])
 			# Process image files
 			elif file.endswith(image_extensions):
 				with ThreadPoolExecutor(max_workers=6) as executor:
 					status = executor.map(self.__convert_images,
-					                      [process_q, file, open_file, content_list, processed_file_list])
+					                      [process_q, file, open_file,
+					                       content_list, processed_file_list])
 					for result in status:
 						print(result)
 			# Process CSV files
 			elif file.endswith('csv'):
-				content_list, processed_file_list = self.__process_csv(file, open_file, content_list, processed_file_list)
+				content_list, processed_file_list = self.__process_csv(file, open_file,
+				                                                       content_list, processed_file_list)
 				process_q.put([content_list, processed_file_list])
 
 		except Exception as e:
@@ -240,8 +260,8 @@ class H5DataCreator:
 			process_q, local_process = self.__open_zip()
 			return process_q, local_process
 		elif self.__input_file.endswith('h5' or 'hdf5'):
-			process_q, local_procses = self.__open_h5()
-			return process_q, local_procses
+			process_q, local_process = self.__open_h5()
+			return process_q, local_process
 		elif self.__input_file.endswith('gz' or 'gzip'):
 			process_q, local_process = self.__open_gzip()
 			return process_q, local_process
@@ -258,7 +278,7 @@ class H5DataCreator:
 				file_list: List = []
 
 			if process_q and local_process:
-				for data in local_process.recv_data(process_q):
+				for data in local_process.get(process_q):
 					content_list, file_list = data
 					for contents, files in content_list, file_list:
 						for file_group, content_lines in contents:
