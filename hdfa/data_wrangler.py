@@ -1,6 +1,8 @@
 import multiprocessing
 import os
 import logging
+from concurrent.futures import ThreadPoolExecutor
+
 from mpLocal import mpQLocal
 import h5py as h5
 from svglib.svglib import svg2rlg
@@ -63,11 +65,40 @@ class H5DataCreator:
 	def __write_content_to_file(self) -> None:
 		self.__h5_file.flush()
 
-	def __convert_images(self, local_q_process: multiprocessing.Process, file: AnyStr,
+	def __process_json(self, file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile,
+	                   content_list: List, processed_file_list: List[str]):
+		file_name = file.casefold()
+		raw_content = open_file.read(file).decode('utf-8').splitlines()
+		content = [row for row in raw_content]
+		content = json.loads(content[0])
+		content_list.append([file_name, content])
+		line_count = len(content_list)
+		processed_file_list.append(file_name + '-' + str(line_count))
+		return content_list, processed_file_list
+
+	def __process_csv(self, file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile,
+	                  content_list: List, processed_file_list: List[str]):
+		with open_file.open(file) as csv_file:
+			csv_reader = csv.reader(csv_file.read().decode('utf-8').splitlines(), delimiter=",",
+			                        doublequote=True, quotechar='"')
+			content = [row for row in csv_reader]
+			content_list.append([file, content])
+			processed_file_list.append(file)
+			return content_list, processed_file_list
+
+	def __process_file_groups(self):
+		pass
+
+	def __create_file_group(self, group_name: AnyStr) -> Tuple:
+		created = self.__h5_file.get(group_name)
+		if not created:
+			self.__h5_file.create_group(group_name, track_order=True)
+			self.__write_content_to_file()
+			return 0, 0
+
+	def __convert_images(self,  process_q: multiprocessing.Queue, file: AnyStr,
 	                     open_file: ZipFile | h5.File | gzip.GzipFile, content_list: List, processed_file_list: List[str]):
 		image_extensions = ('jpg', 'jpeg', 'png', 'bmp', 'tiff')
-		local_process = mpQLocal()
-		local_process.join_mp_process(local_q_process)
 		try:
 			if file.endswith(image_extensions):
 				ds = file.split('/')[0]
@@ -75,10 +106,11 @@ class H5DataCreator:
 					img = tifffile.imread(file)
 				else:
 					with open_file.open(file) as img_file:
-						img = np.array(Image.open(img_file))
-				content_list.append([ds, img])
-				processed_file_list.append(file)
-				local_process.send_data(local_q_process, [content_list, processed_file_list])
+						with ThreadPoolExecutor(max_workers=6) as executor:
+							img = executor.map((np.array(Image.open())), img_file)
+							content_list.append([ds, img])
+							processed_file_list.append(file)
+						process_q.put([content_list, processed_file_list])
 			# Process SVG files (Convert to numpy array via PNG generation)
 			elif file.endswith('svg'):
 				ds = file.split('/')[0]
@@ -89,7 +121,7 @@ class H5DataCreator:
 					img = np.array(Image.open(temp_img))
 					content_list.append([ds, img])
 					processed_file_list.append(file)
-					local_process.send_data(local_q_process, [content_list, processed_file_list])
+					process_q.put([content_list, processed_file_list])
 				finally:
 				# Ensure temp file is removed, even in case of failures.
 					if os.path.exists(temp_img):
@@ -103,42 +135,41 @@ class H5DataCreator:
 		content_list: List = []
 		processed_file_list: List[str] = []
 		# Use multiprocessing and queues for large image lists
-		local_process = mpQLocal()
-		local_q_process, process_q = local_process.setup_mp_process()
-		local_process.join_mp_process(local_q_process)
+		process_q = multiprocessing.Queue()
+		local_process = multiprocessing.Process(target=self.__write_content_to_file(), args=(process_q,))
+		local_process.start()
+		# local_joined_process = local_process.join()
 
 		image_extensions = ('jpg', 'jpeg', 'png', 'bmp', 'tiff')
 		try:
 			if file.endswith('/'):
-				self.__h5_file.create_group(file)
+				f, g = self.__create_file_group(file)
+				if f == 0 and g == 0:
+					process_q.put([f, g])
+					content_list.append(['Group', file])
+					processed_file_list.append(file)
+					return content_list, processed_file_list
 			# Process JSON files
 			if file.endswith('json'):
-				file_name = file.casefold()
-				raw_content = open_file.read(file).decode('utf-8').splitlines()
-				content = [row for row in raw_content]
-				content = json.loads(content[0])
-				content_list.append([file_name, content])
-				line_count = len(content_list)
-				processed_file_list.append(file_name + '-' + str(line_count))
-				local_process.send_data(local_q_process,[content_list, processed_file_list])
+				content_list, processed_file_list = self.__process_json(file, open_file, content_list, processed_file_list)
+				process_q.put([content_list, processed_file_list])
 			# Process image files
 			elif file.endswith(image_extensions):
-				self.__convert_images(local_q_process, file, open_file, content_list, processed_file_list)
+				with ThreadPoolExecutor(max_workers=6) as executor:
+					status = executor.map(self.__convert_images,
+					                      [process_q, file, open_file, content_list, processed_file_list])
+					for result in status:
+						print(result)
 			# Process CSV files
 			elif file.endswith('csv'):
-				with open_file.open(file) as csv_file:
-					csv_reader = csv.reader(csv_file.read().decode('utf-8').splitlines(), delimiter=",",
-					                        doublequote=True, quotechar='"')
-					content = [row for row in csv_reader]
-					content_list.append([file, content])
-					processed_file_list.append(file)
-					local_process.send_data(local_q_process, [content_list, processed_file_list])
+				content_list, processed_file_list = self.__process_csv(file, open_file, content_list, processed_file_list)
+				process_q.put([content_list, processed_file_list])
 
 		except Exception as e:
 			self.__logger.getLogger(__name__).error(f"Error processing file {file}: {e}")
 			print(e)
 
-		return local_process, local_q_process
+		return process_q, local_process
 
 	def __parse_data(self, input_dict: Dict | np.ndarray) -> List:
 		"""
@@ -190,8 +221,8 @@ class H5DataCreator:
 		zip = ZipFile(self.__input_file, 'r')
 		file_list = self.__file_list()
 		for file in file_list:
-			process, local_q = self.__classify_inputs(file, zip)
-			return process, local_q
+			process_q, local_process = self.__classify_inputs(file, zip)
+			return process_q, local_process
 
 	def __open_h5(self) -> Tuple[List, List]:
 		h5file = self.__input_file.h5.open().read().decode('utf-8')
@@ -207,14 +238,14 @@ class H5DataCreator:
 
 	def __input_file_type(self) -> str | Tuple[List, List]:
 		if self.__input_file.endswith('zip' or 'z'):
-			process, local_q = self.__open_zip()
-			return process, local_q
+			process_q, local_process = self.__open_zip()
+			return process_q, local_process
 		elif self.__input_file.endswith('h5' or 'hdf5'):
-			process, local_q = self.__open_h5()
-			return process, local_q
+			process_q, local_procses = self.__open_h5()
+			return process_q, local_procses
 		elif self.__input_file.endswith('gz' or 'gzip'):
-			process, local_q = self.__open_gzip()
-			return process, local_q
+			process_q, local_process = self.__open_gzip()
+			return process_q, local_process
 		else:
 			return ['unknown'], ['unknown']
 
@@ -222,13 +253,13 @@ class H5DataCreator:
 	def input_processor(self) -> h5.File.keys:
 		try:
 			if self.__input_file_type() != 'unknown':
-				process, local_q = self.__input_file_type()
+				process_q, local_process = self.__input_file_type()
 			elif self.__input_dict:
 				content_list = [self.__input_dict]
 				file_list: List = []
 
-			if process and local_q:
-				for data in process.recv_data(local_q):
+			if process_q and local_process:
+				for data in local_process.recv_data(process_q):
 					content_list, file_list = data
 					for contents, files in content_list, file_list:
 						for file_group, content_lines in contents:
