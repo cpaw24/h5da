@@ -3,7 +3,6 @@ import os
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
-from mpLocal import mpQLocal
 import h5py as h5
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
