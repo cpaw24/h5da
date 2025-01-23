@@ -8,7 +8,8 @@ input_files = ["//Volumes//ExtShield//datasets//fashion-dataset.zip"]
 
 for input_file in input_files:
   file_name = input_file.split('/')[-1].split('.')[0]
-  H5DataCreator(input_file=input_file, input_dict={}, output_file=f'tests//{file_name}_filestore.h5').input_processor
+  H5DataCreator(input_file=input_file, input_dict={},
+                output_file=f'tests//{file_name}_filestore.h5', schema_file='schema.json').input_processor()
 
 # rdl = H5DataRetriever(input_file='//Users//claude_paugh//PycharmProjects//HDF5//hdfa//tests//archive_filestore.h5',
 #                       group_list=[], dataset_list=[]).retrieve_group_list()

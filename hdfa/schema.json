@@ -1,0 +1,14 @@
+{
+  "incoming_file_schema": [{
+    "input_file_name": [{
+      "L1": "file_path",
+      "L2": "file_path2"
+    }]
+  }],
+  "outgoing_file_schema": [{
+    "output_file_name": [{
+      "L1": "file_path",
+      "L2": "file_path2"
+    }]
+  }]
+}
