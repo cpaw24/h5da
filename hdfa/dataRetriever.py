@@ -6,7 +6,6 @@ from functools import lru_cache
 from typing import AnyStr, Dict, List, Tuple
 
 
-
 class H5DataRetriever:
     def __init__(self, input_file: str, group_list: List, dataset_list: List) -> None:
         self.__input_file = input_file

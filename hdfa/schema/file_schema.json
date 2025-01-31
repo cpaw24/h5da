@@ -1,0 +1,23 @@
+{
+  "files": {
+    "incoming": {
+      "fashion-dataset.zip": {
+        "L1": "fashion-dataset/",
+        "L2": "fashion-dataset/",
+        "L3": [
+          "images/",
+          "styles/"
+        ]
+      }
+    },
+    "outgoing": {
+      "fashion-dataset_filestore.h5": {
+        "L1": "fashion-dataset/",
+        "L2": [
+          "images/",
+          "styles/"
+        ]
+      }
+    }
+  }
+}

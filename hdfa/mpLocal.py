@@ -1,8 +1,8 @@
-from multiprocessing import Process, Manager, Queue
+from multiprocessing import Process, Manager, Queue, freeze_support
 from typing import List, Tuple, Type
 
 
-class mpQLocal:
+class MpQLocal:
 	"""
 	Creates multiprocessing queue object, and methods to send/receive data.
 	"""

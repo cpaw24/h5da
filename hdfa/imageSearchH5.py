@@ -97,7 +97,6 @@ class H5SearchImages:
                 if v == v1:
                     return [{True, k, v} for k, v in source_file_list if k == k1]
 
-    @property
     def search_exact_match(self):
         match_list = self.__exact_match()
         return match_list
