@@ -15,8 +15,53 @@
         "L1": "fashion-dataset/",
         "L2": [
           "images/",
-          "styles/"
+          "styles/",
+          "video"
         ]
+      },
+      "leaf_content": {
+        "images": {
+          "applies_to": [
+            "jpg",
+            "jpeg",
+            "png",
+            "bmp",
+            "tiff",
+            "blp",
+            "bufr",
+            "cur",
+            "dcx",
+            "dib",
+            "eps",
+            "fits",
+            "gif",
+            "jfif",
+            "jpe",
+            "ico",
+            "icns",
+            "j2c",
+            "j2k",
+            "jp2",
+            "jpc",
+            "jpx",
+            "pcx",
+            "pxr",
+            "pgm",
+            "ppm",
+            "sgi",
+            "svg"
+          ]
+        },
+        "styles": {
+          "applies_to": []
+        },
+        "video": {
+          "applies_to": [
+            "mpeg",
+            "mp4",
+            "mp3"
+          ]
+        }
       }
     }
   }

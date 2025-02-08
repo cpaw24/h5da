@@ -1,26 +1,29 @@
 import logging
 import re
-
+import h5rdmtoolbox as h5tbx
+from pathlib import Path
 import h5py as h5
 from functools import lru_cache
-from typing import AnyStr, Dict, List, Tuple
+from typing import Any, AnyStr, Dict, KeysView, List, Tuple, Type, ValuesView
+from h5py import Dataset, Datatype, ExternalLink, Group, HardLink, SoftLink
 
 
 class H5DataRetriever:
-    def __init__(self, input_file: str, group_list: List, dataset_list: List) -> None:
+    def __init__(self, input_file: str, group_list: List = None, dataset_list: List = None) -> None:
         self.__input_file = input_file
         self.__group_data_list = group_list
         self.__dataset_data_list = dataset_list
         self.__logger = logging.getLogger(__name__)
-        self.__h5_file = h5.File(self.__input_file, 'r', libver='latest', locking=True, driver='None')
+        self.__file_path = Path(self.__input_file)
+        self.__h5_file_tbx = h5tbx.File(self.__file_path, 'r')
 
     def recursive_retrieval(self) -> List | None:
         target: List = []
         return_list: List = []
         if isinstance([group for group in self.retrieve_group_list()], h5.Group):
-            target.append([g for g in self.retrieve_group_list() if g in self.__h5_file[g]])
+            target.append([g for g in self.retrieve_group_list() if g in self.__h5_file_tbx[g]])
         elif isinstance([ds for ds in self.retrieve_dataset_list()], h5.Dataset):
-            target.append([d for d in self.retrieve_dataset_list() if d in self.__h5_file[d]])
+            target.append([d for d in self.retrieve_dataset_list() if d in self.__h5_file_tbx[d]])
 
         if isinstance([t for t in target], h5.Group):
             group_dict = {k: v for k, v in [t for t in target if t.items()]}
@@ -40,20 +43,23 @@ class H5DataRetriever:
         attrs_list: List = []
         groups = self.retrieve_group_list()
         for g in groups:
-            attrs_list.append(self.__h5_file[g].attrs.items())
+            attrs_list.append(self.__h5_file_tbx[g].attrs.items())
         return attrs_list
 
     @lru_cache(maxsize=256)
     def retrieve_group_list(self) -> List:
-        return [name for name in self.__h5_file if isinstance(self.__h5_file[name], h5.Group)]
+        return [name for name in self.__h5_file_tbx if isinstance(self.__h5_file_tbx[name], h5.Group)]
 
     @lru_cache(maxsize=256)
     def retrieve_dataset_list(self) -> List:
-        return [name for name in self.__h5_file if isinstance(self.__h5_file[name], h5.Dataset)]
+        group_list = self.retrieve_group_list()
+        for g in group_list:
+           group = self.__h5_file_tbx[g]
+           return [name for name in group if isinstance(group[name], h5.Dataset)]
 
     @staticmethod
     def __search_str_validation(search_str: AnyStr) -> bool:
-        if re.search(['A-Z', 'a-z', '-', '_'][0-9], search_str):
+        if re.search('\\w+', search_str, re.UNICODE):
             return True
         else:
             return False
@@ -65,39 +71,35 @@ class H5DataRetriever:
         elif first_size < second_size != 0:
             return False
 
-    def retrieve_searched_group(self, searched_group: AnyStr) -> Tuple:
-        all_groups_size = len(self.retrieve_group_list())
-        target_group_size = len(self.__group_data_list)
-        group = None
+    def retrieve_searched_group(self, searched_group: AnyStr = None) -> Tuple[Group, Any, List[Any]] | None:
         if self.__search_str_validation(searched_group):
-            result = self.__search_group_priority(all_groups_size, target_group_size)
+            # result = self.__search_group_priority(all_groups_size, target_group_size)
+            result = None
             if result:
-                group = self.__group_data_list
+                group_list = self.__group_data_list
             elif not result:
-                group = self.retrieve_group_list()
+                group_list = self.retrieve_group_list()
 
-            for g in group:
-                if isinstance(g, h5.Group) and g.name == searched_group:
-                    return (searched_group, {k: v for k, v in g.items()}, {k: v for k, v in g.attrs.items()})
+                for g in group_list:
+                    group = self.__h5_file_tbx[g]
+                    if isinstance(group, h5.Group) and group.name.replace('/', '') == searched_group:
+                        return group, group.get(searched_group, getclass=True, getlink=True), []
+                        # return searched_group, {k: v for k, v in group.items()}, {k: v for k, v in group.attrs.items()}
         else:
             self.__logger.error(f"Invalid search string: {searched_group}")
 
-    def retrieve_searched_dataset(self, searched_dataset: AnyStr) -> Tuple:
-        all_datasets_size = len(self.retrieve_dataset_list())
-        target_dataset_size = len(self.__dataset_data_list)
-        dataset = None
+    def retrieve_searched_dataset(self, searched_dataset: AnyStr) -> List | None:
+        group_list = self.retrieve_group_list()
         if self.__search_str_validation(searched_dataset):
-            result = self.__search_group_priority(all_datasets_size, target_dataset_size)
-            if result:
-                dataset = self.__dataset_data_list
-            elif not result:
-                dataset = self.retrieve_dataset_list()
+           dataset = self.retrieve_dataset_list()
+           for ds in dataset:
+              if ds == searched_dataset:
+                 for group in group_list:
+                    htb = self.__h5_file_tbx[group][ds]
+           return [htb, self.__h5_file_tbx[group]]
 
-            for ds in dataset:
-                if isinstance(ds, h5.Dataset) and ds.name == searched_dataset:
-                    if ds.chunks:
-                        return (searched_dataset, [item for item in ds.iter_chunks() if item], {k: v for k, v in ds.attrs.items()})
-                    elif not ds.chunks:
-                        return (searched_dataset, {k: v for k, v in ds.collective.__dict__()}, {k: v for k, v in ds.attrs.items()})
         else:
             self.__logger.error(f"Invalid dataset name: {searched_dataset}")
+
+
+

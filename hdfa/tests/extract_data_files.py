@@ -1,41 +1,27 @@
-from collections.abc import KeysView, ValuesView, ItemsView
-from hdfa.dataWrangler import H5FileCreator, InputProcessor
-from hdfa.dataRetriever import H5DataRetriever
-import json
+from hdfa.dataWrangler import DataProcessor
 
-#["//Volumes//ExtShield//datasets//archive.zip"] #,
-input_files = ["//Volumes//ExtShield//datasets//fashion-dataset.zip"]
+# Extract constants for hardcoded paths to make the code more maintainable
+INPUT_FILE_PATH = "//Volumes//ExtShield//datasets//fashion-dataset.zip"
+SCHEMA_FILE_PATH = "//Users//claude_paugh//PycharmProjects//HDF5//hdfa//schema//file_schema.json"
+OUTPUT_DIR = "//Volumes//ExtShield//datasets//hdfa_files//"
+BATCH_PROCESS_LIMIT = 5
 
-# file_schema = json.load(open('file_schema.json'))
+def initialize_data_processor(input_file: str, schema_file: str, output_dir: str) -> DataProcessor:
+	"""
+    Initializes the DataProcessor with the given parameters.
+    """
+	file_name = input_file.split("/")[-1].split(".")[0]  # Extract file name without extension
+	output_file = f"{output_dir}/{file_name}_filestore.h5"
+	return DataProcessor(
+		input_file=input_file,
+		input_dict={},
+		output_file=output_file,
+		schema_file=schema_file
+	)
 
-for input_file in input_files:
-  file_name = input_file.split('/')[-1].split('.')[0]
 
-H5FileCreator(output_file=f'tests//{file_name}_filestore.h5').create_file()
-processor = InputProcessor(input_dict={}, input_file=input_file,
-                             output_file=f'tests//{file_name}_filestore.h5',
-                             schema_file='//Users//claude_paugh//PycharmProjects//HDF5//hdfa//schema//file_schema.json'
-                             )
-processor.file_processor()
-  # H5DataCreator(input_file=input_file, input_dict={},
-  #              output_file=f'tests//{file_name}_filestore.h5',
-  #              schema_file='//Users//claude_paugh//PycharmProjects//HDF5//hdfa//schema//file_schema.json').input_processor()
-
-# rdl = H5DataRetriever(input_file='//Users//claude_paugh//PycharmProjects//HDF5//hdfa//tests//archive_filestore.h5',
-#                       group_list=[], dataset_list=[]).retrieve_group_list()
-# sg = H5DataRetriever(input_file='//Users//claude_paugh//PycharmProjects//HDF5//hdfa//tests//archive_filestore.h5',
-#                       group_list=[], dataset_list=[]).retrieve_group_attrs_data()
-# for g in rdl:
-#    f, rsg, attrs = H5DataRetriever(input_file='//Users//claude_paugh//PycharmProjects//HDF5//hdfa//tests//archive_filestore.h5',
-#                          group_list=[], dataset_list=[]).retrieve_searched_group(g)
-# rdl = H5DataRetriever(input_file='./archive_2_filestore.h5', group_list=[], dataset_list=[]).retrieve_group_list()
-# print(rdl)
-# for view in sg:
-#   for r in enumerate(view):
-#     i, d = r
-#     ix, val = d
-#     print(i)
-#     print(val)
-
+# Main logic
+data_processor = initialize_data_processor(INPUT_FILE_PATH, SCHEMA_FILE_PATH, OUTPUT_DIR)
+data_processor.file_processor(group_keys=["images/", "styles/"], batch_process_limit=BATCH_PROCESS_LIMIT)
 
 

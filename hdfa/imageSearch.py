@@ -1,11 +1,11 @@
 import os
 import logging
-import h5py as h5
+import h5rdmtoolbox as h5tbx
 import lmdb
 from click import open_file
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
-from dataWrangler import H5DataCreator
+from dataWrangler import DataProcessor
 from typing import AnyStr, List, Tuple
 import numpy as np
 from PIL import Image
@@ -19,7 +19,7 @@ class H5SearchImages:
         self.__use_path = use_path
         self.__searched_files = searched_files
         self.__input_file_size = os.path.getsize(self.__input_file)
-        self.H5File = h5.File(self.__input_file, 'r', libver='latest', driver='None', locking=True)
+        self.H5File = h5tbx.File(self.__input_file, 'r')
         if self.__input_file_size <= 100000000:
             self.idx_db = lmdb.open(os.path.join(self.__use_path, 'image_index.lmdb'), map_size=(1024 * 1024 * 102.4))
         elif self.__input_file_size > 100000000:
@@ -42,7 +42,10 @@ class H5SearchImages:
         raise Exception("Error storing index")
 
     def __content_index(self):
-        image_extensions = ('jpg', 'jpeg', 'png', 'bmp', 'tiff')
+        image_extensions = ('jpg', 'jpeg', 'png', 'bmp', 'tiff', 'blp', 'bufr', 'cur', 'dcx', 'dib', 'eps', 'fits',
+                            'gif', 'jfif', 'jpe', 'ico', 'icns', 'j2c', 'j2k', 'jp2', 'jpc', 'jpx', 'pcx', 'pxr',
+                            'pgm', 'ppm', 'sgi', 'svg')
+        video_extensions = ('mpeg', 'mp4', 'mp3')
         __files = self.__searched_files
         for __file in __files:
             if __file.endswith(image_extensions):
@@ -68,7 +71,7 @@ class H5SearchImages:
                     continue
 
             elif __file.endswith('svg'):
-                rig = H5DataCreator.random_int_generator()
+                rig = DataProcessor.random_int_generator()
                 temp_img = f"{rig}_temp.png"
                 try:
                     drawing = svg2rlg(open_file(__file))
@@ -86,7 +89,7 @@ class H5SearchImages:
     def __iterate_source(self):
         with self.H5File.__iter__():
             for k, v in self.H5File:
-                if isinstance(v, h5.Dataset):
+                if isinstance(v, h5tbx.Dataset):
                    yield k, hash(v)
 
     def __exact_match(self):
