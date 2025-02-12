@@ -1,5 +1,5 @@
 from multiprocessing import Process, Manager, Queue, freeze_support
-from typing import List, Tuple, Type
+from typing import List, Type
 
 
 class MpQLocal:
