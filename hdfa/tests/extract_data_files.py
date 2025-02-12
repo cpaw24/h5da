@@ -4,7 +4,7 @@ from hdfa.dataWrangler import DataProcessor
 INPUT_FILE_PATH = "//Volumes//ExtShield//datasets//fashion-dataset.zip"
 SCHEMA_FILE_PATH = "//Users//claude_paugh//PycharmProjects//HDF5//hdfa//schema//file_schema.json"
 OUTPUT_DIR = "//Volumes//ExtShield//datasets//hdfa_files//"
-BATCH_PROCESS_LIMIT = 5
+BATCH_PROCESS_LIMIT = 3
 
 def initialize_data_processor(input_file: str, schema_file: str, output_dir: str) -> DataProcessor:
 	"""
@@ -22,6 +22,6 @@ def initialize_data_processor(input_file: str, schema_file: str, output_dir: str
 
 # Main logic
 data_processor = initialize_data_processor(INPUT_FILE_PATH, SCHEMA_FILE_PATH, OUTPUT_DIR)
-data_processor.file_processor(group_keys=["images/", "styles/"], batch_process_limit=BATCH_PROCESS_LIMIT)
+data_processor.start_processor(group_keys=["images/", "styles/"], batch_process_limit=BATCH_PROCESS_LIMIT)
 
 

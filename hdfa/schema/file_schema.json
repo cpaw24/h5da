@@ -2,26 +2,24 @@
   "files": {
     "incoming": {
       "fashion-dataset.zip": {
-        "L1": "fashion-dataset/",
-        "L2": "fashion-dataset/",
-        "L3": [
-          "images/",
-          "styles/"
-        ]
-      }
+        "dirs": {
+          "D1": "/fashion-dataset/fashion-dataset/images/",
+          "D2": "/fashion-dataset/fashion-dataset/styles/"
+        }
+      },
+      "archive.zip": {}
     },
     "outgoing": {
       "fashion-dataset_filestore.h5": {
-        "L1": "fashion-dataset/",
-        "L2": [
-          "images/",
-          "styles/",
-          "video"
-        ]
+        "groups": {
+          "FG1": "/fashion-dataset/images/",
+          "FG2": "/fashion-dataset/styles/",
+          "FG3": "/fashion-dataset/video/"
+        }
       },
       "leaf_content": {
-        "images": {
-          "applies_to": [
+         "images/": {
+            "sources": [
             "jpg",
             "jpeg",
             "png",
@@ -52,11 +50,11 @@
             "svg"
           ]
         },
-        "styles": {
-          "applies_to": []
+        "styles/": {
+          "sources": []
         },
-        "video": {
-          "applies_to": [
+        "video/": {
+          "sources": [
             "mpeg",
             "mp4",
             "mp3"
@@ -64,5 +62,5 @@
         }
       }
     }
+    }
   }
-}

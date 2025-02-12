@@ -4,11 +4,12 @@ import h5rdmtoolbox as h5tbx
 from pathlib import Path
 import h5py as h5
 from functools import lru_cache
-from typing import Any, AnyStr, Dict, KeysView, List, Tuple, Type, ValuesView
+from typing import Any, AnyStr, Dict, List, Tuple
 from h5py import Dataset, Datatype, ExternalLink, Group, HardLink, SoftLink
 
 
 class H5DataRetriever:
+    """Inits H5DataRetriever class. Uses the h5rdmtoolbox library to retrieve data from the input file."""
     def __init__(self, input_file: str, group_list: List = None, dataset_list: List = None) -> None:
         self.__input_file = input_file
         self.__group_data_list = group_list
@@ -35,11 +36,13 @@ class H5DataRetriever:
         return return_list
 
     def retrieve_all_data_lists(self) -> Tuple[List, List]:
+        """Retrieves all group and dataset names from the input file."""
         group_data_list = self.retrieve_group_list()
         dataset_data_list = self.retrieve_dataset_list()
         return (group_data_list, dataset_data_list)
 
     def retrieve_group_attrs_data(self) -> List[Dict]:
+        """Retrieves all group attributes from the input file."""
         attrs_list: List = []
         groups = self.retrieve_group_list()
         for g in groups:
@@ -48,10 +51,12 @@ class H5DataRetriever:
 
     @lru_cache(maxsize=256)
     def retrieve_group_list(self) -> List:
+        """Retrieves all group names from the input file."""
         return [name for name in self.__h5_file_tbx if isinstance(self.__h5_file_tbx[name], h5.Group)]
 
     @lru_cache(maxsize=256)
     def retrieve_dataset_list(self) -> List:
+        """Retrieves all dataset names from the input file."""
         group_list = self.retrieve_group_list()
         for g in group_list:
            group = self.__h5_file_tbx[g]
@@ -72,6 +77,7 @@ class H5DataRetriever:
             return False
 
     def retrieve_searched_group(self, searched_group: AnyStr = None) -> Tuple[Group, Any, List[Any]] | None:
+        """Retrieves the searched group from the input file."""
         if self.__search_str_validation(searched_group):
             # result = self.__search_group_priority(all_groups_size, target_group_size)
             result = None
@@ -83,12 +89,13 @@ class H5DataRetriever:
                 for g in group_list:
                     group = self.__h5_file_tbx[g]
                     if isinstance(group, h5.Group) and group.name.replace('/', '') == searched_group:
-                        return group, group.get(searched_group, getclass=True, getlink=True), []
-                        # return searched_group, {k: v for k, v in group.items()}, {k: v for k, v in group.attrs.items()}
+                        return (group, group.get(searched_group, getclass=True, getlink=True),
+                                [group.attrs.items() for group in group.values()])
         else:
             self.__logger.error(f"Invalid search string: {searched_group}")
 
     def retrieve_searched_dataset(self, searched_dataset: AnyStr) -> List | None:
+        """Retrieves the searched dataset from the input file."""
         group_list = self.retrieve_group_list()
         if self.__search_str_validation(searched_dataset):
            dataset = self.retrieve_dataset_list()
@@ -96,10 +103,8 @@ class H5DataRetriever:
               if ds == searched_dataset:
                  for group in group_list:
                     htb = self.__h5_file_tbx[group][ds]
-           return [htb, self.__h5_file_tbx[group]]
+                    return [htb, self.__h5_file_tbx[group], self.__h5_file_tbx[group].attrs.items()]
 
         else:
             self.__logger.error(f"Invalid dataset name: {searched_dataset}")
-
-
 
