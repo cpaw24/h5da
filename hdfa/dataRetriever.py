@@ -8,15 +8,18 @@ from typing import Any, AnyStr, Dict, List, Tuple
 from h5py import Dataset, Datatype, ExternalLink, Group, HardLink, SoftLink
 
 
-class H5DataRetriever:
-    """Inits H5DataRetriever class. Uses the h5rdmtoolbox library to retrieve data from the input file."""
+class DataRetriever:
+    """Inits DataRetriever class. Uses the h5rdmtoolbox library to retrieve data from the input file."""
     def __init__(self, input_file: str, group_list: List = None, dataset_list: List = None) -> None:
         self.__input_file = input_file
         self.__group_data_list = group_list
         self.__dataset_data_list = dataset_list
-        self.__logger = logging.getLogger(__name__)
         self.__file_path = Path(self.__input_file)
+        self.__initialize()
+
+    def __initialize(self):
         self.__h5_file_tbx = h5tbx.File(self.__file_path, 'r')
+        self.__logger = logging.getLogger(__name__)
 
     def recursive_retrieval(self) -> List | None:
         target: List = []
@@ -46,7 +49,7 @@ class H5DataRetriever:
         attrs_list: List = []
         groups = self.retrieve_group_list()
         for g in groups:
-            attrs_list.append(self.__h5_file_tbx[g].attrs.items())
+            attrs_list.append([g, self.__h5_file_tbx[g].attrs.items()])
         return attrs_list
 
     @lru_cache(maxsize=256)
@@ -55,7 +58,7 @@ class H5DataRetriever:
         return [name for name in self.__h5_file_tbx if isinstance(self.__h5_file_tbx[name], h5.Group)]
 
     @lru_cache(maxsize=256)
-    def retrieve_dataset_list(self) -> List:
+    def retrieve_dataset_list(self) -> List | None:
         """Retrieves all dataset names from the input file."""
         group_list = self.retrieve_group_list()
         for g in group_list:
@@ -70,7 +73,7 @@ class H5DataRetriever:
             return False
 
     @staticmethod
-    def __search_group_priority(first_size: int, second_size: int) -> bool:
+    def __search_group_priority(first_size: int, second_size: int) -> bool | None:
         if (first_size == second_size) or (first_size > second_size != 0):
             return True
         elif first_size < second_size != 0:

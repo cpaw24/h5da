@@ -12,12 +12,15 @@ from PIL import Image
 import tifffile
 
 
-class H5SearchImages:
+class SearchImages:
     def __init__(self, input_file: AnyStr, searched_files: List, use_path: AnyStr = os.getcwd()):
-        self.__logger = logging.getLogger(__name__)
         self.__input_file = input_file
         self.__use_path = use_path
         self.__searched_files = searched_files
+        self.__initialize()
+
+    def __initialize(self):
+        self.__logger = logging.getLogger(__name__)
         self.__input_file_size = os.path.getsize(self.__input_file)
         self.H5File = h5tbx.File(self.__input_file, 'r')
         if self.__input_file_size <= 100000000:
@@ -28,7 +31,7 @@ class H5SearchImages:
     def __store_index(self, source_data: Tuple) -> bool | None:
         try:
             with self.idx_db.begin(write=True).cursor() as txn:
-                k, v = source_data
+                i, k, v = source_data
                 txn.put(f"b'{k}'", f"b'{v}'")
                 txn.commit()
                 return True
@@ -52,7 +55,7 @@ class H5SearchImages:
                 try:
                     if __file.endswith('tiff'):
                         tiff_img_array = tifffile.imread(__file)
-                        tiff_hash_img = (__file, [hash(tiff_img_array), tiff_img_array])
+                        tiff_hash_img = (__file, hash(tiff_img_array), 'tiff')
                         status = self.__store_index(tiff_hash_img)
                         if status:
                             continue
@@ -61,7 +64,7 @@ class H5SearchImages:
                     else:
                         with __file.open() as img_file:
                             img = np.array(Image.open(img_file))
-                            hash_img = (__file, [hash(img), img])
+                            hash_img = (__file, hash(img), 'img')
                             status = self.__store_index(hash_img)
                             if status:
                                 continue
@@ -77,7 +80,7 @@ class H5SearchImages:
                     drawing = svg2rlg(open_file(__file))
                     renderPM.drawToFile(drawing, temp_img, fmt='PNG')
                     img = np.array(Image.open(temp_img))
-                    hash_img = (__file, [hash(img), img])
+                    hash_img = (__file, hash(img), 'svg')
                     status = self.__store_index(hash_img)
                     if status:
                         continue
