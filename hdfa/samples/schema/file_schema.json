@@ -17,9 +17,9 @@
           "FG3": "/fashion-dataset/video/"
         }
       },
-      "leaf_content": {
-         "images/": {
-            "sources": [
+    "leaf_content": {
+      "images/": {
+           "sources": [
             "jpg",
             "jpeg",
             "png",
@@ -47,14 +47,15 @@
             "pgm",
             "ppm",
             "sgi",
-            "svg"
+            "svg",
+            "csv"
           ]
+    },
+      "styles/": {
+        "sources": ["json"]
         },
-        "styles/": {
-          "sources": []
-        },
-        "video/": {
-          "sources": [
+      "video/": {
+         "sources": [
             "mpeg",
             "mp4",
             "mp3"
@@ -62,5 +63,5 @@
         }
       }
     }
-    }
+   }
   }

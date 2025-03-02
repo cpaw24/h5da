@@ -4,7 +4,7 @@ from typing import List, Type
 
 class MpQLocal:
 	"""
-	Creates multiprocessing queue object, and methods to send/receive data.
+	Creates multiprocessing queue object.
 	"""
 	def __init__(self):
 		self.__manager = Manager
@@ -25,23 +25,8 @@ class MpQLocal:
 	def get_queue(self) -> Queue:
 		return self.__queue
 
-	def get_manager(self) -> Manager:
-		return self.__manager
-
-	def get_process(self) -> Process:
-		return self.Process
-
-	def join_mp_process(self, p: Process) -> None:
-		return p.join()
-
 	def send_data(self, q: Queue, data: List):
 		return q.put(data)
-
-	def recv_data(self, q: Queue) -> List:
-		return q.get()
-
-	def mp_queue_empty(self, q: Queue):
-		return q.empty()
 
 	def terminate_mp_process(self, p: Process) -> None:
 		return self.Process.terminate(p)

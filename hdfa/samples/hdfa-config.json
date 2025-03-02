@@ -1,0 +1,12 @@
+{
+  "batch_process_limit": 5,
+  "batch_chunk_size": 1000,
+  "dataset_compression": "zip",
+  "image_extensions": ["jpg", "jpeg", "png", "bmp", "tiff", "blp", "bufr", "cur", "dcx", "dib", "eps", "fits",
+                       "gif", "jfif", "jpe", "ico", "icns", "j2c", "j2k", "jp2", "jpc", "jpx", "pcx", "pxr",
+                       "pgm", "ppm", "sgi", "svg"],
+  "video_extensions": ["mpeg", "mp4", "mp3"],
+  "allowed_types": ["jpg", "jpeg", "png", "bmp", "tiff", "blp", "bufr", "cur", "dcx", "dib", "eps", "fits",
+                       "gif", "jfif", "jpe", "ico", "icns", "j2c", "j2k", "jp2", "jpc", "jpx", "pcx", "pxr",
+                       "pgm", "ppm", "sgi", "svg", "mpeg", "mp4", "mp3"]
+}
