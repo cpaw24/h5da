@@ -31,10 +31,10 @@ The "samples" folder contains examples for each and scripts on sample usage.
 
 Docs with more detail on classes and functions can be found:
 
-[dataWrangler](htmldoc/dataWrangler.html)
+[dataWrangler](hdfa/src/hdfa/htmldoc/dataWrangler.html)
 
-[dataRetriever](htmldoc/dataRetriever.html)
+[dataRetriever](hdfa/src/hdfa/htmldoc/dataRetriever.html)
 
-[imageSearch](htmldoc/imageSearch.html)
+[imageSearch](hdfa/src/hdfa/htmldoc/imageSearch.html)
 
 
