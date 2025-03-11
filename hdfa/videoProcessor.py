@@ -2,10 +2,9 @@ import gzip
 import io
 import tarfile
 import zipfile
-from typing import AnyStr
+from typing import AnyStr, List
 import numpy as np
 import h5py as h5
-from typing_extensions import List
 from skvideo import io as vio
 
 
@@ -16,7 +15,7 @@ class VideoProcessor:
 	@staticmethod
 	def process_video(file: AnyStr | io.BytesIO,
 	                  open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
-	                  content_list: List, processed_file_list: List[str], pix_format: AnyStr = "rgb24") -> List:
+	                  content_list: List, processed_file_list: List[str], pix_format: AnyStr = "rgb24") -> List[List] | None:
 		"""Converts MP4/MP3 video to Numpy array
 		:param pix_format:
 		:param file: Path to the input file (e.g., .zip, .gz, .h5).

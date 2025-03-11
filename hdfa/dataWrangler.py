@@ -1,9 +1,9 @@
 import gc
 import io
 import math
-
-from distributed.utils_test import double
-
+import time
+import signal
+from parsingProcessor import ParsingProcessor
 from imageProcessor import ImageProcessor
 from schemaProcessor import SchemaProcessor
 from videoProcessor import VideoProcessor
@@ -14,11 +14,10 @@ import uuid
 import tarfile
 import zipfile
 from datetime import datetime
-
 from hdfa.mpLocal import MpQLocal
 import h5py as h5
 from zipfile import ZipFile
-from typing import AnyStr, Dict, List, Tuple
+from typing import Any, AnyStr, Dict, List, Tuple
 import numpy as np
 import json
 import random
@@ -51,7 +50,7 @@ class DataProcessor:
         self.__h5_file = self.__create_file(self.__output_file)
         self.__schema_dict = json.load(open(self.__schema_file, 'r'))
         self.__config_dict = json.load(open(self.__config_file, 'r'))
-        """ Initialize image, video, schema, and text processors """
+        """ Initialize image, video, schema, parsing, and text processors """
         self._img_processor = ImageProcessor(self.__output_file,
                                              schema_dict=self.__schema_dict,
                                              config_dict=self.__config_dict)
@@ -61,6 +60,7 @@ class DataProcessor:
                                                  schema_file=self.__schema_file,
                                                  config_file=self.__config_file
         )
+        self._parsing_processor = ParsingProcessor()
 
     @staticmethod
     def random_int_generator() -> str:
@@ -81,6 +81,7 @@ class DataProcessor:
     def _flush_content_to_file(h5_file: h5.File) -> None:
         """Flush content from memory to HDF5 file."""
         h5_file.flush()
+        gc.collect()
 
     @staticmethod
     def _gen_dataset_name():
@@ -96,15 +97,6 @@ class DataProcessor:
         :return: None"""
         h5_file.require_group(file_group).attrs[f'{attr}'] = attr_value
         return h5_file.flush()
-
-    def find_list_depth(self, obj: List | AnyStr) -> int | None:
-        """Find the maximum depth of a nested list, and return the value.
-        :param obj: List or string."""
-        if not isinstance(obj, list):
-            return 0
-        if not obj:
-            return 1
-        return 1 + max(self.find_list_depth(item) for item in obj)
 
     def set_dataset_attributes(self, h5_file: h5.File, file_group: AnyStr, file: AnyStr) -> None:
         """Standard set of attributes to write per dataset.
@@ -128,24 +120,42 @@ class DataProcessor:
                                    attr='file-type-extension', attr_value=file.split('.')[-1])
             self.update_file_group(h5_file=h5_file, file_group=file_group,
                                    attr='source-root', attr_value=file.split('/')[0])
+
+            self._flush_content_to_file(h5_file=h5_file)
         except AttributeError as ae:
             print(f'AttributeError: {ae, ae.args}')
         except Exception as e:
             print(f'Attribute Exception: {e, e.args}')
 
-    def create_dataset_from_dict(self, h5_file: h5.File, name: AnyStr, data: Dict, file_group: AnyStr) -> None:
-        """Create a dataset from a dictionary. Numpy arrays are string-ified and converted to byte strings.
+    def _process_list_depth(self, data: List) -> List | None:
+        list_depth = self._parsing_processor.find_list_depth(data)
+        result: List = []
+        x = 0
+        while x < list_depth:
+           for row in data:
+              result.append(self._parsing_processor.process_row(row))
+              x += 1
+        return result
+
+    def create_dataset_from_dict(self, h5_file: h5.File, data: Dict, file_group: AnyStr) -> None:
+        """Create a dataset from a dictionary. Dictionaries are string-ified into key:value lists. Nested dictionaries become nested lists
         :param h5_file: HDF5 file object.
-        :param name: HDF5 dataset name.
         :param data: HDF5 dataset data in dictionary format.
         :param file_group: HDF5 group.
         :return: None"""
         try:
-            kv_list = self.parse_data(input_dict=data)
-            kv_dict = kv_list[0]
-            kvl = {str.encode(k): str.encode(v) for (k, v) in kv_dict.items()}
-            kva = np.array(kvl, dtype=np.dtype('S'))
-            h5_file.require_group(file_group).create_dataset(name, data=kva, compression='gzip')
+            kv_list = self._parsing_processor.parse_data(input_dict=data)
+            obj, req, d = kv_list
+            g = h5_file.require_group(file_group)
+            name = self._gen_dataset_name()
+            g.require_group(name)
+            data_str = self._process_list_depth(data=d)
+            for row in data_str:
+               if row and row != []:
+                  name = self._gen_dataset_name()
+                  g.create_dataset(name=name, data=row, shape=len(row), compression='gzip')
+                  print(f"write dataset {name} in file group {file_group}")
+            self._flush_content_to_file(h5_file=h5_file)
         except ValueError as ve:
             print(f'Dataset from Dict ValueError: {ve, ve.args}')
         except TypeError as te:
@@ -162,51 +172,42 @@ class DataProcessor:
         :param file: file name from input source.
         :return: None"""
         try:
-            gc.collect()
-            h5_file.flush()
-            if isinstance(data, List):
-               if len(data) == 1 and isinstance(data[0], Dict):
-                  name = self._gen_dataset_name()
-                  self.create_dataset_from_dict(h5_file=h5_file, name=name, data=data[0], file_group=file_group)
+            self._flush_content_to_file(h5_file=h5_file)
+            if isinstance(data, List) and isinstance(data[0], List | np.ndarray | Dict):
+               if isinstance(data[0], Dict):
+                  self.create_dataset_from_dict(h5_file=h5_file, data=data[0], file_group=file_group)
                   self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
-                  print(f"write dataset {name} - {file}")
 
-               elif len(data) == 1 and isinstance(data[0], List):
-                   obj_depth = self.find_list_depth(data[0])
-                   for i in range(obj_depth):
-                      while i <= obj_depth:
-                       if isinstance(data[0][i], List):
-                            for dat in data[0][i]:
-                               name = self._gen_dataset_name()
-                               obj = str(dat)
-                               kva = np.array(obj.encode('utf-8'), dtype=np.dtype('S'))
-                               h5_file.require_group(file_group).create_dataset(name=name, data=kva, compression='gzip')
-                               self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
-                               print(f"write dataset {name} - {file}")
-                       elif isinstance(data[0][i], str):
-                          obj2 = data[0][i]
-                          self.update_file_group(h5_file=h5_file, file_group=file_group,
-                                                 attr='dataset-file', attr_value=obj2)
+               elif isinstance(data[0], np.ndarray):
+                   name = self._gen_dataset_name()
+                   g = h5_file.require_group(file_group)
+                   g.create_dataset(name=name, data=data[0], compression='gzip')
+                   print(f"write dataset {name} - {file}")
+                   self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
 
-               elif len(data) == 1 and isinstance(data[0], str | int | float | bool | datetime):
-                  obj = str(data[0])
-                  self.update_file_group(h5_file=h5_file, file_group=file_group,
-                                         attr='file-group-attribute', attr_value=obj)
+               elif isinstance(data[0], List):
+                  data_str = self._process_list_depth(data=data)
+                  name = self._gen_dataset_name()
+                  g = h5_file.require_group(file_group)
+                  if data_str and not data_str == [[]]:
+                     g.create_dataset(name=name, data=data_str, compression='gzip')
+                     self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+                     print(f"write dataset {name} - {file}")
+                  else:
+                     print(f"No data to write for {file}")
 
             elif isinstance(data, Dict):
-               name = self._gen_dataset_name()
-               self.create_dataset_from_dict(h5_file=h5_file, name=name, data=data, file_group=file_group)
-               print(f"write dataset {name} - {file}")
+               self.create_dataset_from_dict(h5_file=h5_file, data=data, file_group=file_group)
                self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
 
             elif isinstance(data, np.ndarray):
                name = self._gen_dataset_name()
-               h5_file.require_group(file_group).create_dataset(name=name, data=data, compression='gzip')
+               g = h5_file.require_group(file_group)
+               g.create_dataset(name=name, data=data, compression='gzip')
                print(f"write dataset {name} - {file}")
                self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
 
-            gc.collect()
-            return h5_file.flush()
+            return self._flush_content_to_file(h5_file=h5_file)
         except ValueError as ve:
             print(f'Dataset from Input ValueError: {ve, ve.args}')
         except TypeError as te:
@@ -214,7 +215,7 @@ class DataProcessor:
         except Exception as e:
             print(f'Dataset from Input Exception: {e, e.args}')
 
-    def create_file_group(self, h5_file: h5.File, group_name: AnyStr, content_size: int = 0):
+    def create_file_group(self, h5_file: h5.File, group_name: AnyStr, content_size: int = 0) -> None:
         """Create a new file group in the HDF5 file.
         :param h5_file: HDF5 file object.
         :param group_name: New file group name.
@@ -237,14 +238,24 @@ class DataProcessor:
                         open_file: ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                         process_q: multiprocessing.Queue) -> None:
         """Classify and process input file content into structured data formats. Valid inputs types are JSON, CSV,
-        video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO. Add them to multiprocessing.Queue.
+        video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO.
+        Add results to multiprocessing.Queue.
         :param file: Path to the input file in archive (e.g., .zip, .gz, .h5).
-        :param open_file: ZipFile, Gzip, or h5.File object.
-        :param process_q: multiprocessing.Queue"""
+        :param open_file: ZipFile, Gzip, Tarfile, h5.File, and BytesIO object.
+        :param process_q: multiprocessing.Queue
+        :return: None"""
         content_list: List = []
         processed_file_list: List[str] = []
         image_extensions = self.__config_dict.get('image_extensions')
         video_extensions = self.__config_dict.get('video_extensions')
+        if isinstance(open_file, io.BytesIO):
+            io_file = open_file.getbuffer()
+            if max(io_file.suboffsets) >= 1:
+                """It has PIL file properties, so convert to JPEG"""
+                file = open_file.name + '.jpeg'
+                open_file.close()
+                open_file = self._file_io_buffer(file)
+                file = open_file.name
         try:
             if not file.endswith('/'):
                 """ Process JSON files """
@@ -274,35 +285,8 @@ class DataProcessor:
         except Exception as e:
             print(f'classify_inputs Exception: {e, e.args}')
             pass
-
-    def parse_data(self, input_dict: Dict | np.ndarray) -> List:
-        """
-        Recursively parses a nested dictionary or a numpy array to extract and organize
-        data into a list of key-value pairs.
-        :param input_dict: Dictionary or numpy array to parse.
-        :return: List of --> key-value pairs, numpy arrays, or possibly tuples.
-        """
-        value_list: List = []
-        if isinstance(input_dict, Dict):
-            for k, v in input_dict.items():
-                if isinstance(v, Dict):
-                    """ Recursive call for nested dictionaries """
-                    value_list.extend([self.parse_data(v)])
-                elif isinstance(v, (List, np.ndarray)):
-                    """ Check if the list or array contains integers """
-                    if all(isinstance(i, int) for i in v):
-                        """ Ensure v is converted to a numpy array only when needed """
-                        value_list.append([k, np.ndarray(v)])
-                    else:
-                        """ Add raw lists if not integers """
-                        value_list.append([k, v])
-                elif isinstance(v, Tuple):
-                    _a, _b, _c = v
-                    value_list.append([k, [_a, _b, _c]])
-                elif isinstance(v, (int, str)):
-                    """ Add primitive types (e.g., strings, numbers) """
-                    value_list.append([k, v])
-        return value_list
+        finally:
+            gc.collect()
 
     def process_content_list(self, content: List, file_group: AnyStr, h5_file: h5.File = None):
         try:
@@ -311,11 +295,9 @@ class DataProcessor:
                 self._flush_content_to_file(h5_file=h5_file)
         except Exception as e:
             print(f'process_content_list Exception: {e}')
-        finally:
-            h5_file.flush()
 
     def start_mp(self) -> [multiprocessing.Queue, multiprocessing.Process]:
-        """ Use multiprocessing and queues for large number of images; requires batch limits to be set in order to control
+        """ Use multiprocessing and queues for large number of files and content; requires batch limits to be set in order to control
          the number of items in the queue and free memory on the host.
         :return: process_q which is a multiprocessing queue, and local_mpq which is a multiprocessing process"""
         try:
@@ -356,7 +338,7 @@ class DataProcessor:
         :return sliced file list"""
         batches = math.ceil(len(file_list) / batch_size)
         batch_list: List = []
-        for i in range(batches)[0:20]:
+        for i in range(batches):
             start_batch = i * batch_size
             end_batch = start_batch + batch_size - 1
             batch_list.append(file_list[start_batch:end_batch])
@@ -369,48 +351,68 @@ class DataProcessor:
                         batch_chunk_size: int = None) -> None:
         """Process input files in batches calculated from __size_batching to free memory and avoid memory errors.
         Batch limits are set in the hdfs=config.json file.
-        :param file_input can be a ZipFile, GzipFile or h5.File
+        :param file_input can be a ZipFile, GzipFile, Tarfile, h5.File, or BytesIO object.
         :param file_list is a list of files in file format returned by self.file_list()"""
-        allowed_types = self.__config_dict.get('allowed_types')
-        if not batch_chunk_size:
-           batch_chunk_size = self.__config_dict.get('batch_chunk_size')
-        if not batch_process_limit:
-            batch_process_limit = self.__config_dict.get('batch_process_limit')
+        try:
+            allowed_types = self.__config_dict.get('allowed_types')
+            if not batch_chunk_size:
+               batch_chunk_size = self.__config_dict.get('batch_chunk_size')
+            if not batch_process_limit:
+                batch_process_limit = self.__config_dict.get('batch_process_limit')
 
-        if not file_list:
-            if self.__input_file.split('.')[-1] in allowed_types:
-                self.classify_inputs(file_input, file_input, process_q)
-        else:
-            batch_list = self.__size_batching(file_list, batch_chunk_size)
-            file_sz = len(file_list)
-            b_counter = 0
-            print(f"Processing {file_sz} files in batches of {batch_process_limit * batch_chunk_size} ")
-            for batch in batch_list:
-                for file in batch:
-                    if not file.endswith('/'):
-                      self.classify_inputs(file, file_input, process_q)
-                    else:
-                       print(f"Skipping directory: {file}")
-                       continue
-                b_counter += 1
-                print(f""" Process data in {batch_process_limit * batch_chunk_size} files per batch, freeing up host memory consumption """)
-                print(f"Batch {b_counter} of {len(batch_list)} at {datetime.now()}")
+            if not file_list:
+                if self.__input_file.split('.')[-1] in allowed_types:
+                    self.classify_inputs(file_input, file_input, process_q)
+            else:
+                batch_list = self.__size_batching(file_list, batch_chunk_size)
+                file_sz = len(file_list)
+                b_counter = 0
+                f_counter = 0
+                print(f"Processing {file_sz} files in batches of {batch_process_limit * batch_chunk_size} ")
+                for batch in batch_list:
+                    for file in batch:
+                        if not file.endswith('/') and file.split('.')[-1] in allowed_types:
+                          f_counter += 1
+                          print(f""" Processing file {file}, file count {f_counter} in slice {len(batch_list)} in batch {b_counter} """)
+                          self.classify_inputs(file, file_input, process_q)
+                        else:
+                           print(f"Skipping: {file}")
+                           continue
+                    b_counter += 1
+                    print(f""" Process data in {batch_process_limit * batch_chunk_size} files per batch, managing host memory consumption """)
+                    print(f"Batch {b_counter} of {len(batch_list)} at {datetime.now()}")
 
-                """ Below when batch counter matches the process_limit, begin writing to h5 file"""
-                """ This will clear the contents of the queue and write to the h5 file """
-                if b_counter == batch_process_limit:
-                    self._data_handler(process_q, file_group=file.split('/')[0], file_list=file_list)
-                    b_counter = 0
-                    gc.collect()
-                elif batch_list[-1] == batch:
-                    self._data_handler(process_q, file_group=file.split('/')[0], file_list=file_list)
-                    gc.collect()
-                    b_counter = 0
+                    """ Below when batch counter matches the process_limit, begin writing to h5 file"""
+                    """ This will clear the contents of the queue and write to the h5 file """
+                    if b_counter == batch_process_limit:
+                        self._data_handler(process_q, file_group=file.split('/')[0], file_list=file_list)
+                        b_counter = 0
+                    elif batch_list[-1] == batch:
+                        self._data_handler(process_q, file_group=file.split('/')[0], file_list=file_list)
+                        b_counter = 0
+                total_batch_count = b_counter + 1
+                print(f"Total batches processed: {total_batch_count}")
+                resource_check = total_batch_count % 10
+                if (str(resource_check).split('.')[-1] == 0) and (total_batch_count > 0):
+                    print(f"Total batches processed: {total_batch_count}")
+                    print(f"Total files processed: {file_sz}")
+                    print(f"Total files in queue: {process_q.qsize()}")
+                    print(f"Total files in h5 file: {len(self._get_file_group(file_input, file.split('/')[0]))}")
+                    print(f"Total bytes in input file: {os.path.getsize(self.__input_file)}")
+                    print(f"Total bytes in queue: {process_q.qsize() * 1024}")
+                    print(f"Total bytes in h5 file: {self._get_file_group(file_input, file.split('/')[0]).attrs['content_size'] * 1024}")
+                    print(f"Total bytes in input file: {os.path.getsize(self.__input_file) * 1024}")
+
+        except Exception as e:
+           print(f'__process_batch Exception: {e, e.args}')
+           process_q.put(f" __process_batch Exception: {e, e.args}")
+        finally:
+           gc.collect()
 
     @staticmethod
-    def _file_io_buffer(input_file):
+    def _file_io_buffer(input_file: AnyStr) -> io.BytesIO:
         """Create buffer for reading bytes from a file."""
-        with open(input_file, 'rb', buffering=(1024 * 1024 * 100)) as file:
+        with open(input_file, 'rb', buffering=(1024 * 1024 * 200)) as file:
             bytes_content = file.read()
             file_buffer = io.BytesIO(bytes_content)
             return file_buffer
@@ -424,7 +426,7 @@ class DataProcessor:
             if self.__input_file.endswith('zip' or 'z'):
                 file_buffer = self._file_io_buffer(self.__input_file)
                 zipped = zipfile.ZipFile(file_buffer, 'r', allowZip64=True)
-                file_list = self.file_list(zipped)
+                file_list = zipped.namelist()
                 self.__process_batch(zipped, file_list, process_q, batch_process_limit)
 
             elif self.__input_file.endswith('h5' or 'hdf5'):
@@ -432,8 +434,8 @@ class DataProcessor:
                 self.__process_batch(h5file, [], process_q, batch_process_limit)
 
             elif self.__input_file.endswith('tar.gz') | self.__input_file.endswith('tar'):
-                """Provide custom buffer size for tar files to avoid memory errors."""
-                with tarfile.open(self.__input_file, 'r', bufsize=(1024 * 1024 * 500)) as tar:
+                """Provide custom buffer size for tar files to get more efficient reads."""
+                with tarfile.open(self.__input_file, 'r', bufsize=(1024 * 1024 * 200)) as tar:
                     file_list = self.file_list(tar)
                     self.__process_batch(tar, file_list, process_q, batch_process_limit)
 
@@ -443,6 +445,7 @@ class DataProcessor:
                 self.__process_batch(file_buffer, file_list, process_q, batch_process_limit)
 
             else:
+                """If input file is not a ZIP, HDF5, TAR, or GZIP file, process the entire file as a single file."""
                 file_list = []
                 file_buffer = self._file_io_buffer(self.__input_file)
                 self.__process_batch(file_input=file_buffer, file_list=file_list,
@@ -450,10 +453,13 @@ class DataProcessor:
 
         except Exception as e:
             print(f'_input_file_type Exception: {e, e.args}')
+            process_q.put(f"_input_file_type Exception: {e, e.args}")
         except BaseException as be:
             print(f'_input_file_type BaseException: {be, be.args}')
+            process_q.put(f"_input_file_type BaseException: {be, be.args}")
 
-    def _process_schema_input(self, h5_file: h5.File, content_list: List = None) -> Tuple:
+    def _process_schema_input(self, h5_file: h5.File, content_list: List = None) -> Tuple[
+	                                                                                    None | list | str, Any, Any] | None:
         """ Use multiprocessing and queues for large image lists
         :param h5_file is file object
         :param content_list is list
@@ -471,6 +477,11 @@ class DataProcessor:
         except BaseException as be:
             print(f'_process_schema_input BaseException: {be}')
 
+    def _process_ds_default(self, h5_file: h5.File, file_group: AnyStr, file: AnyStr, content_list: List = None) -> None:
+        file_group = file_group.split('/')[-1]
+        self.create_dataset_from_input(h5_file=h5_file, data=content_list, file_group=file_group, file=file)
+        self._flush_content_to_file(h5_file=h5_file)
+
     def _data_handler(self, process_q: multiprocessing.Queue, file_group: AnyStr, file_list: AnyStr) -> None:
         """While there is content in the queue, process it and write to the HDF5 file.
         If the queue is empty, write the schema to the HDF5 file.
@@ -480,49 +491,38 @@ class DataProcessor:
         :param file_group: str
         Tuples of lists and files are returned from the queue each iteration."""
         try:
+            h5_file = h5.File(self.__output_file, mode=self.__write_mode)
             while not process_q.empty():
                for data in process_q.get():
                   if isinstance(data, List):
                      """data from queue should be tuples"""
-                     if len(data) == 1:
-                         if len(data[0]) == 3:
-                            file_group, content_list, file = data[0]
-                            file = file_group
-                            file_group = file_group.split('/')[-1]
-                         else:
-                             file_name = data[0]
-                             self.update_file_group(h5_file=h5_file, file_group=file_group,
-                                                    attr='file-name', attr_value=file_name)
-                     elif len(data) == 3:
-                        file_group, content_list, file = data
+                     if isinstance(data[0][1], np.ndarray):
+                        file_group, content_list, file = data[0]
+                        self._process_ds_default(h5_file=h5_file, file_group=file_group,
+                                                 file=file, content_list=content_list)
+                     elif (isinstance(data, List) and not isinstance(data[0][1], np.ndarray) and len(data[0]) == 3):
+                        file_group, content_list, file = data[0]
                         file = file_group
-                        file_group = file_group.split('/')[-1]
-
-                     if file_group and content_list and file:
-                        h5_file = h5.File(self.__output_file, mode=self.__write_mode)
-                        if isinstance(content_list, np.ndarray):
-                           self.create_dataset_from_input(h5_file=h5_file, data=content_list,
-                                                          file_group=file_group, file=file)
-                           self._flush_content_to_file(h5_file=h5_file)
-
-                        elif isinstance(data, Dict) | isinstance(data, List):
-                           self.create_dataset_from_input(h5_file=h5_file, data=data, file_group=file_group, file=file)
-                           self._flush_content_to_file(h5_file=h5_file)
-
+                        self._process_ds_default(h5_file=h5_file, file_group=file_group,
+                                                 file=file, content_list=content_list)
                      else:
-                        if content_list and file_list:
-                            for contents, file in content_list, file_list:
-                               for file_group, content_lines in contents:
-                                  if not self._get_file_group(h5_file=h5_file, group_name=file_group):
-                                     self.create_file_group(file_group, len(content_list))
-                                     print("write file group attrs")
-                                  elif not file_group:
-                                     file_group = 'root'
-                                     if not self._get_file_group(h5_file=h5_file, group_name=file_group):
-                                        self.create_file_group(h5_file=h5_file, group_name=file_group,
-                                                               content_size=len(content_list))
-                                        print("write root attrs")
-                                        self.process_content_list(content=content_lines, file_group=file_group)
+                        file_name = data[0]
+                        self.update_file_group(h5_file=h5_file, file_group=file_group,
+                                               attr='file-name', attr_value=file_name)
+
+                        if not isinstance(content_list, np.ndarray) and content_list and file_list and not file_group:
+                           for contents, file in content_list, file_list:
+                              for file_group, content_lines in contents:
+                                 if not self._get_file_group(h5_file=h5_file, group_name=file_group):
+                                    self.create_file_group(file_group, len(content_list))
+                                    print("write file group attrs")
+                                 elif not file_group:
+                                    file_group = 'root'
+                                    if not self._get_file_group(h5_file=h5_file, group_name=file_group):
+                                       self.create_file_group(h5_file=h5_file, group_name=file_group,
+                                                              content_size=len(content_list))
+                                       print("write root attrs")
+                                       self.process_content_list(content=content_lines, file_group=file_group)
                   else:
                      print("Cannot process file fragment --> No content to process")
                      pass
@@ -534,7 +534,7 @@ class DataProcessor:
            print(f'_data_handler BaseException: {be, be.args}')
         finally:
            if process_q.empty():
-              exit()
+              pass
 
     def start_processing(self, group_keys: List, batch_process_limit: int = None) -> h5.File.keys:
         """Start the data processing pipeline.
@@ -542,6 +542,7 @@ class DataProcessor:
         :param batch_process_limit is the maximum number of splits to create
         :returns h5.File keys"""
         try:
+            signal.signal(signal.SIGTERM, self.signal_handler)
             """h5 file is closed after the init of the class; open it here"""
             h5_file = h5.File(self.__output_file, mode=self.__write_mode)
             paths, process_q, local_mpq = self._process_schema_input(h5_file)
@@ -572,6 +573,7 @@ class DataProcessor:
 
         except Exception as e:
             print(f'start_processor Exception: {e, e.args}')
+            pass
         except BaseException as be:
             print(f'start_processor BaseException: {be, be.args}')
             pass
@@ -582,3 +584,18 @@ class DataProcessor:
             """ Close H5 file again when finished; return keys """
             h5_file.close()
             return h5_keys
+
+    def signal_handler(self, sig, frame, h5_file: h5.File) -> None:
+        """Handle signals sent to the process on Mac or Linux.
+        :param sig: signal
+        :param frame: frame
+        :return: None"""
+        print('Received signal:', sig)
+        print('Performing cleanup...')
+        # Add cleanup code here, e.g., closing files, releasing resources
+        gc.collect()
+        h5_file.flush()
+        time.sleep(1)  # Simulate cleanup
+        print('Cleanup complete. Exiting.')
+        pass
+

@@ -63,7 +63,8 @@ class SchemaProcessor:
         """Load and persist contents of the schema file
         :param h5_file is file object
         :param content_list is list of objects
-        :param processed_file_list is list of objects"""
+        :param processed_file_list is list of objects
+        :returns list of objects or string"""
         try:
             if not content_list: content_list: List = []
             if not processed_file_list: processed_file_list: List = []

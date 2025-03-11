@@ -7,7 +7,7 @@ import os
 import io
 import random
 from PIL import Image
-from typing import AnyStr, List, Dict
+from typing import Any, AnyStr, List, Dict, Tuple
 import numpy as np
 from reportlab.graphics import renderPM
 from svglib.svglib import svg2rlg
@@ -21,14 +21,13 @@ class ImageProcessor:
 
     def convert_images(self, file: AnyStr | io.BytesIO,
                        open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
-                       content_list: List, processed_file_list: List[str]):
+                       content_list: List, processed_file_list: List[str]) -> Tuple[List | Any, List[str] | Any] | None:
         """Convert image files to Numpy arrays and add them to multiprocessing.Queue.
-        :param process_q: multiprocessing.Queue
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
         :param open_file: ZipFile, Gzip, or h5.File object.
         :param content_list: Content list to be processed.
         :param processed_file_list: Processed file list to be processed.
-        :return None"""
+        :return Tuple[content_list, processed_file_list]"""
         try:
            ds = file.split('/')[0]
            """ Process SVG files (Convert to numpy array via PNG generation) """
@@ -56,7 +55,7 @@ class ImageProcessor:
            print(f'convert_images Exception: {e}')
 
     def process_svg(self, file: AnyStr, open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile,
-                    content_list: List, processed_file_list: List[str]) -> [List, List]:
+                    content_list: List, processed_file_list: List[str]) -> Tuple[List | Any, List[str] | Any] | None:
        """Converts SVG files to Numpy arrays
        :param file: Path to the input file (e.g., .zip, .gz, .h5).
        :param open_file: ZipFile, Gzip, or h5.File object.
@@ -76,6 +75,7 @@ class ImageProcessor:
           img = np.array(Image.open(temp_img))
           content_list.append([ds, img, file])
           processed_file_list.append(file)
+
           return content_list, processed_file_list
 
        except Exception as e:

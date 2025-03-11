@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 # H5 Datafiles
 /hdfa/tests/archive_filestore.h5
+/qodana.yaml
