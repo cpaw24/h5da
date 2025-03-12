@@ -235,7 +235,7 @@ class DataProcessor:
         return h5_file.get(group_name)
 
     def classify_inputs(self, file: AnyStr | io.BytesIO,
-                        open_file: ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                        open_file: ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                         process_q: multiprocessing.Queue) -> None:
         """Classify and process input file content into structured data formats. Valid inputs types are JSON, CSV,
         video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO.
@@ -347,7 +347,7 @@ class DataProcessor:
         return batch_list
 
     def _process_batch(self,
-                       file_input: zipfile.ZipFile | gzip.GzipFile | h5.File | tarfile.TarFile | io.BytesIO,
+                       file_input: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                        file_list: List,
                        process_q: multiprocessing.Queue, batch_process_limit: int = None,
                        batch_chunk_size: int = None) -> None:
@@ -430,10 +430,6 @@ class DataProcessor:
                 zipped = zipfile.ZipFile(file_buffer, 'r', allowZip64=True)
                 file_list = zipped.namelist()
                 self._process_batch(zipped, file_list, process_q, batch_process_limit)
-
-            elif self.__input_file.endswith('h5' or 'hdf5'):
-                h5file = h5.File(self.__input_file, 'r')
-                self._process_batch(h5file, [], process_q, batch_process_limit)
 
             elif self.__input_file.endswith('tar.gz') | self.__input_file.endswith('tar'):
                 """Provide custom buffer size for tar files to get more efficient reads."""

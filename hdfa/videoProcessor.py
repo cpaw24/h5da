@@ -13,7 +13,7 @@ class VideoProcessor:
 
 	@staticmethod
 	def process_video(file: AnyStr | io.BytesIO,
-	                  open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+	                  open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
 	                  content_list: List, processed_file_list: List[str], pix_format: AnyStr = "rgb24") -> List[List] | None:
 		"""Converts MP4/MP3 video to Numpy array
 		:param pix_format:

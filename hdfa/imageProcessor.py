@@ -20,7 +20,7 @@ class ImageProcessor:
         self.__config_dict = config_dict
 
     def convert_images(self, file: AnyStr | io.BytesIO,
-                       open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                       open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                        content_list: List, processed_file_list: List[str]) -> Tuple[List | Any, List[str] | Any] | None:
         """Convert image files to Numpy arrays and add them to multiprocessing.Queue.
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
@@ -54,7 +54,7 @@ class ImageProcessor:
         except Exception as e:
            print(f'convert_images Exception: {e}')
 
-    def process_svg(self, file: AnyStr, open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile,
+    def process_svg(self, file: AnyStr, open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile,
                     content_list: List, processed_file_list: List[str]) -> Tuple[List | Any, List[str] | Any] | None:
        """Converts SVG files to Numpy arrays
        :param file: Path to the input file (e.g., .zip, .gz, .h5).

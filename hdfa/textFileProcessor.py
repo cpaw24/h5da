@@ -13,7 +13,7 @@ class TextFileProcessor:
         pass
 
     @staticmethod
-    def process_json(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile,
+    def process_json(file: AnyStr, open_file: ZipFile | gzip.GzipFile,
                      content_list: List, processed_file_list: List[str]) -> Tuple[List, List[str]] | None:
         """Converts JSON files to dictionaries
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
@@ -45,7 +45,7 @@ class TextFileProcessor:
                 os.remove('/' + file_name)
 
     @staticmethod
-    def process_csv(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile,
+    def process_csv(file: AnyStr, open_file: ZipFile | gzip.GzipFile | tarfile.TarFile,
                     content_list: List, processed_file_list: List[str]) -> Tuple[List, List[str]] | None:
         """Converts CSV files to lists of values
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
