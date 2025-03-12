@@ -35,6 +35,15 @@ Docs with more detail on classes and functions can be found:
 
 [dataRetriever](hdfa/src/hdfa/htmldoc/dataRetriever.html)
 
-[imageSearch](hdfa/src/hdfa/htmldoc/imageSearch.html)
+[imageProcessor](hdfa/src/hdfa/htmldoc/imageProcessor.html)
 
+[videoProcessor](hdfa/src/hdfa/htmldoc/videoProcessor.html)
+
+[schemaProcessor](hdfa/src/hdfa/htmldoc/schemaProcessor.html)
+
+[parsingProcessor](hdfa/src/hdfa/htmldoc/parsingProcessor.html)
+
+[textFileProcessor](hdfa/src/hdfa/htmldoc/textFileProcessor.html)
+
+[mpLocal](hdfa/src/hdfa/htmldoc/mpLocal.html)
 

@@ -68,9 +68,9 @@ class ParsingProcessor:
         return isinstance(lst, list) and len(lst) == size
 
     def process_row(self, row) -> List | None:
-        """Process a single row and return formatted strings.
+        """Process row(s) and return formatted strings. Support for nested lists.
         :param row: List of key-value pairs.
-        :return: List of formatted strings."""
+        :return: List of formatted strings or None."""
         list_size_single: int = 1  # Constant for list size one
         list_size_double: int = 2  # Constant for list of two elements
         list_size_triple: int = 3  # Constant for list size three

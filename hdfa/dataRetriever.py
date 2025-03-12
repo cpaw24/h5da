@@ -52,12 +52,12 @@ class DataRetriever:
             attrs_list.append([g, self.__h5_file_tbx[g].attrs.items()])
         return attrs_list
 
-    @lru_cache(maxsize=256)
+    @lru_cache(maxsize=25)
     def retrieve_group_list(self) -> List:
         """Retrieves all group names from the input file."""
         return [name for name in self.__h5_file_tbx if isinstance(self.__h5_file_tbx[name], h5.Group)]
 
-    @lru_cache(maxsize=256)
+    @lru_cache(maxsize=25)
     def retrieve_dataset_list(self) -> List | None:
         """Retrieves all dataset names from the input file."""
         group_list = self.retrieve_group_list()
@@ -74,6 +74,7 @@ class DataRetriever:
 
     @staticmethod
     def __search_group_priority(first_size: int, second_size: int) -> bool | None:
+        """Not Implemented."""
         if (first_size == second_size) or (first_size > second_size != 0):
             return True
         elif first_size < second_size != 0:
@@ -82,13 +83,11 @@ class DataRetriever:
     def retrieve_searched_group(self, searched_group: AnyStr = None) -> Tuple[Group, Any, List[Any]] | None:
         """Retrieves the searched group from the input file."""
         if self.__search_str_validation(searched_group):
-            # result = self.__search_group_priority(all_groups_size, target_group_size)
             result = None
             if result:
                 group_list = self.__group_data_list
             elif not result:
                 group_list = self.retrieve_group_list()
-
                 for g in group_list:
                     group = self.__h5_file_tbx[g]
                     if isinstance(group, h5.Group) and group.name.replace('/', '') == searched_group:

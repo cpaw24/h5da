@@ -24,7 +24,7 @@ class ImageProcessor:
                        content_list: List, processed_file_list: List[str]) -> Tuple[List | Any, List[str] | Any] | None:
         """Convert image files to Numpy arrays and add them to multiprocessing.Queue.
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
-        :param open_file: ZipFile, Gzip, or h5.File object.
+        :param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
         :param content_list: Content list to be processed.
         :param processed_file_list: Processed file list to be processed.
         :return Tuple[content_list, processed_file_list]"""
@@ -58,7 +58,7 @@ class ImageProcessor:
                     content_list: List, processed_file_list: List[str]) -> Tuple[List | Any, List[str] | Any] | None:
        """Converts SVG files to Numpy arrays
        :param file: Path to the input file (e.g., .zip, .gz, .h5).
-       :param open_file: ZipFile, Gzip, or h5.File object.
+       :param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
        :param content_list: Content list to be processed.
        :param processed_file_list: Processed file list to be processed.
        :return tuple[content_list, processed_file_list]"""
@@ -88,6 +88,7 @@ class ImageProcessor:
              os.remove(temp_img)
 
     def process_bio_image(self):
+        """Not Implemented"""
         pass
 
     @staticmethod

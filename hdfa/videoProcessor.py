@@ -7,7 +7,6 @@ import numpy as np
 import h5py as h5
 from skvideo import io as vio
 
-
 class VideoProcessor:
 	def __init__(self):
 		pass

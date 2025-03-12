@@ -14,6 +14,7 @@ import tifffile
 
 
 class SearchImages:
+    """Not Implemented."""
     def __init__(self, input_file: AnyStr, searched_files: List, use_path: AnyStr = os.getcwd(), config_file: AnyStr = None):
         self.__input_file = input_file
         self.__use_path = use_path
