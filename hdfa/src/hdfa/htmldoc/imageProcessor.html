@@ -62,11 +62,11 @@ el.replaceWith(d);
         self.__config_dict = config_dict
 
     def convert_images(self, file: AnyStr | io.BytesIO,
-                       open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                       open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                        content_list: List, processed_file_list: List[str]) -&gt; Tuple[List | Any, List[str] | Any] | None:
         &#34;&#34;&#34;Convert image files to Numpy arrays and add them to multiprocessing.Queue.
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
-        :param open_file: ZipFile, Gzip, or h5.File object.
+        :param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
         :param content_list: Content list to be processed.
         :param processed_file_list: Processed file list to be processed.
         :return Tuple[content_list, processed_file_list]&#34;&#34;&#34;
@@ -96,11 +96,11 @@ el.replaceWith(d);
         except Exception as e:
            print(f&#39;convert_images Exception: {e}&#39;)
 
-    def process_svg(self, file: AnyStr, open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile,
+    def process_svg(self, file: AnyStr, open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile,
                     content_list: List, processed_file_list: List[str]) -&gt; Tuple[List | Any, List[str] | Any] | None:
        &#34;&#34;&#34;Converts SVG files to Numpy arrays
        :param file: Path to the input file (e.g., .zip, .gz, .h5).
-       :param open_file: ZipFile, Gzip, or h5.File object.
+       :param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
        :param content_list: Content list to be processed.
        :param processed_file_list: Processed file list to be processed.
        :return tuple[content_list, processed_file_list]&#34;&#34;&#34;
@@ -130,6 +130,7 @@ el.replaceWith(d);
              os.remove(temp_img)
 
     def process_bio_image(self):
+        &#34;&#34;&#34;Not Implemented&#34;&#34;&#34;
         pass
 
     @staticmethod
@@ -159,7 +160,7 @@ def random_int_generator() -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="imageProcessor.ImageProcessor.convert_images"><code class="name flex">
-<span>def <span class="ident">convert_images</span></span>(<span>self,<br>file: ~AnyStr | _io.BytesIO,<br>open_file: zipfile.ZipFile | h5py._hl.files.File | gzip.GzipFile | tarfile.TarFile | _io.BytesIO,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List | Any, List[str] | Any] | None</span>
+<span>def <span class="ident">convert_images</span></span>(<span>self,<br>file: ~AnyStr | _io.BytesIO,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | _io.BytesIO,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List | Any, List[str] | Any] | None</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -167,11 +168,11 @@ def random_int_generator() -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def convert_images(self, file: AnyStr | io.BytesIO,
-                   open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                   open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                    content_list: List, processed_file_list: List[str]) -&gt; Tuple[List | Any, List[str] | Any] | None:
     &#34;&#34;&#34;Convert image files to Numpy arrays and add them to multiprocessing.Queue.
     :param file: Path to the input file (e.g., .zip, .gz, .h5).
-    :param open_file: ZipFile, Gzip, or h5.File object.
+    :param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
     :param content_list: Content list to be processed.
     :param processed_file_list: Processed file list to be processed.
     :return Tuple[content_list, processed_file_list]&#34;&#34;&#34;
@@ -203,7 +204,7 @@ def random_int_generator() -&gt; str:
 </details>
 <div class="desc"><p>Convert image files to Numpy arrays and add them to multiprocessing.Queue.
 :param file: Path to the input file (e.g., .zip, .gz, .h5).
-:param open_file: ZipFile, Gzip, or h5.File object.
+:param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
 :param content_list: Content list to be processed.
 :param processed_file_list: Processed file list to be processed.
 :return Tuple[content_list, processed_file_list]</p></div>
@@ -217,23 +218,24 @@ def random_int_generator() -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_bio_image(self):
+    &#34;&#34;&#34;Not Implemented&#34;&#34;&#34;
     pass</code></pre>
 </details>
-<div class="desc"></div>
+<div class="desc"><p>Not Implemented</p></div>
 </dd>
 <dt id="imageProcessor.ImageProcessor.process_svg"><code class="name flex">
-<span>def <span class="ident">process_svg</span></span>(<span>self,<br>file: ~AnyStr,<br>open_file: zipfile.ZipFile | h5py._hl.files.File | gzip.GzipFile | tarfile.TarFile,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List | Any, List[str] | Any] | None</span>
+<span>def <span class="ident">process_svg</span></span>(<span>self,<br>file: ~AnyStr,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List | Any, List[str] | Any] | None</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def process_svg(self, file: AnyStr, open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile,
+<pre><code class="python">def process_svg(self, file: AnyStr, open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile,
                 content_list: List, processed_file_list: List[str]) -&gt; Tuple[List | Any, List[str] | Any] | None:
    &#34;&#34;&#34;Converts SVG files to Numpy arrays
    :param file: Path to the input file (e.g., .zip, .gz, .h5).
-   :param open_file: ZipFile, Gzip, or h5.File object.
+   :param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
    :param content_list: Content list to be processed.
    :param processed_file_list: Processed file list to be processed.
    :return tuple[content_list, processed_file_list]&#34;&#34;&#34;
@@ -264,7 +266,7 @@ def random_int_generator() -&gt; str:
 </details>
 <div class="desc"><p>Converts SVG files to Numpy arrays
 :param file: Path to the input file (e.g., .zip, .gz, .h5).
-:param open_file: ZipFile, Gzip, or h5.File object.
+:param open_file: ZipFile, Gzip, h5.File, or Tarfile object.
 :param content_list: Content list to be processed.
 :param processed_file_list: Processed file list to be processed.
 :return tuple[content_list, processed_file_list]</p></div>

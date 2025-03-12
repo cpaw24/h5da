@@ -60,7 +60,7 @@ el.replaceWith(d);
 
         @staticmethod
         def process_video(file: AnyStr | io.BytesIO,
-                          open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                          open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                           content_list: List, processed_file_list: List[str], pix_format: AnyStr = &#34;rgb24&#34;) -&gt; List[List] | None:
                 &#34;&#34;&#34;Converts MP4/MP3 video to Numpy array
                 :param pix_format:
@@ -112,7 +112,7 @@ el.replaceWith(d);
 <h3>Static methods</h3>
 <dl>
 <dt id="videoProcessor.VideoProcessor.process_video"><code class="name flex">
-<span>def <span class="ident">process_video</span></span>(<span>file: ~AnyStr | _io.BytesIO,<br>open_file: zipfile.ZipFile | h5py._hl.files.File | gzip.GzipFile | tarfile.TarFile | _io.BytesIO,<br>content_list: List,<br>processed_file_list: List[str],<br>pix_format: ~AnyStr = 'rgb24') ‑> List[List] | None</span>
+<span>def <span class="ident">process_video</span></span>(<span>file: ~AnyStr | _io.BytesIO,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | _io.BytesIO,<br>content_list: List,<br>processed_file_list: List[str],<br>pix_format: ~AnyStr = 'rgb24') ‑> List[List] | None</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -121,7 +121,7 @@ el.replaceWith(d);
 </summary>
 <pre><code class="python">@staticmethod
 def process_video(file: AnyStr | io.BytesIO,
-                  open_file: zipfile.ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                  open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                   content_list: List, processed_file_list: List[str], pix_format: AnyStr = &#34;rgb24&#34;) -&gt; List[List] | None:
         &#34;&#34;&#34;Converts MP4/MP3 video to Numpy array
         :param pix_format:

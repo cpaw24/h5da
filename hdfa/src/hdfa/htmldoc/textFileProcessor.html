@@ -59,7 +59,7 @@ el.replaceWith(d);
         pass
 
     @staticmethod
-    def process_json(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile,
+    def process_json(file: AnyStr, open_file: ZipFile | gzip.GzipFile,
                      content_list: List, processed_file_list: List[str]) -&gt; Tuple[List, List[str]] | None:
         &#34;&#34;&#34;Converts JSON files to dictionaries
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
@@ -91,7 +91,7 @@ el.replaceWith(d);
                 os.remove(&#39;/&#39; + file_name)
 
     @staticmethod
-    def process_csv(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile,
+    def process_csv(file: AnyStr, open_file: ZipFile | gzip.GzipFile | tarfile.TarFile,
                     content_list: List, processed_file_list: List[str]) -&gt; Tuple[List, List[str]] | None:
         &#34;&#34;&#34;Converts CSV files to lists of values
         :param file: Path to the input file (e.g., .zip, .gz, .h5).
@@ -131,7 +131,7 @@ el.replaceWith(d);
 <h3>Static methods</h3>
 <dl>
 <dt id="textFileProcessor.TextFileProcessor.process_csv"><code class="name flex">
-<span>def <span class="ident">process_csv</span></span>(<span>file: ~AnyStr,<br>open_file: zipfile.ZipFile | h5py._hl.files.File | gzip.GzipFile | tarfile.TarFile,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List, List[str]] | None</span>
+<span>def <span class="ident">process_csv</span></span>(<span>file: ~AnyStr,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List, List[str]] | None</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -139,7 +139,7 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def process_csv(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile | tarfile.TarFile,
+def process_csv(file: AnyStr, open_file: ZipFile | gzip.GzipFile | tarfile.TarFile,
                 content_list: List, processed_file_list: List[str]) -&gt; Tuple[List, List[str]] | None:
     &#34;&#34;&#34;Converts CSV files to lists of values
     :param file: Path to the input file (e.g., .zip, .gz, .h5).
@@ -183,7 +183,7 @@ def process_csv(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile | tar
 :return tuple[content_list, processed_file_list]</p></div>
 </dd>
 <dt id="textFileProcessor.TextFileProcessor.process_json"><code class="name flex">
-<span>def <span class="ident">process_json</span></span>(<span>file: ~AnyStr,<br>open_file: zipfile.ZipFile | h5py._hl.files.File | gzip.GzipFile,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List, List[str]] | None</span>
+<span>def <span class="ident">process_json</span></span>(<span>file: ~AnyStr,<br>open_file: zipfile.ZipFile | gzip.GzipFile,<br>content_list: List,<br>processed_file_list: List[str]) ‑> Tuple[List, List[str]] | None</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -191,7 +191,7 @@ def process_csv(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile | tar
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def process_json(file: AnyStr, open_file: ZipFile | h5.File | gzip.GzipFile,
+def process_json(file: AnyStr, open_file: ZipFile | gzip.GzipFile,
                  content_list: List, processed_file_list: List[str]) -&gt; Tuple[List, List[str]] | None:
     &#34;&#34;&#34;Converts JSON files to dictionaries
     :param file: Path to the input file (e.g., .zip, .gz, .h5).
