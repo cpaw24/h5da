@@ -1,9 +1,9 @@
-from hdfa.dataWrangler import DataProcessor
+from src.hdfa.dataWrangler import DataProcessor
 
 # Extract constants for hardcoded paths to make the code more maintainable
 INPUT_FILE_PATH = "//Volumes//ExtShield//datasets//fashion-dataset.zip"
-SCHEMA_FILE_PATH = "//Users//claude_paugh//PycharmProjects//HDF5//hdfa//samples//schema//file_schema.json"
-CONFIG_FILE_PATH = "//Users//claude_paugh//PycharmProjects//HDF5//hdfa//samples//hdfa-config.json"
+SCHEMA_FILE_PATH = "/file_schema.json"
+CONFIG_FILE_PATH = "/hdfa-config.json"
 OUTPUT_DIR = "//Volumes//ExtShield//datasets//hdfa_files"
 BATCH_PROCESS_LIMIT = 5
 

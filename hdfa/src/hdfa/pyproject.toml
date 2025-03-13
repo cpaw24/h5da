@@ -1,0 +1,114 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tools.setuptool.packages.find]
+where = ["src/hdfa"]
+
+[project]
+name = "hdfa"
+dynamic = ["version"]
+description = 'HDF5 Data Access Toolkit'
+readme = "README.md"
+requires-python = ">=3.12.6"
+license = {text = "MIT"}
+keywords = ["h5", "hdf5", "mp4", "images"]
+authors = [
+  { name = "cpaw24", email = "claude.paugh@perarduaconsulting.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12.6",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Operating System :: POSIX :: Unix"
+]
+dependencies = [
+  "numpy~=1.26.4",
+  "multiprocessing",
+  "uuid",
+  "io",
+  "gc",
+  "math",
+  "time",
+  "signal",
+  "tarfile",
+  "zipfile",
+  "h5py~=3.13.0",
+  "json",
+  "random",
+  "gzip",
+  "h5rdmtoolbox~=1.7.2",
+  "os",
+  "datetime",
+  "time",
+  "signal",
+  "functools",
+  "regex~=2024.11.6",
+  "logging",
+  "pathlib",
+  "tifffile~=2025.2.18",
+  "pillow~=11.1.0",
+  "reportlab~=4.3.0",
+  "svglib~=1.5.1",
+  "typing",
+  "csv",
+  "sk-video~=1.1.10"
+]
+
+[project.urls]
+Documentation = "https://github.com/cpaw24/h5da/hdfa"
+Issues = "https://github.com/cpaw24/h5da/hdfa/issues"
+Source = "https://github.com/cpaw24/h5da/hdfa"
+
+[tool.hatch.version]
+path = "__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.15.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/cryptotrading tests}"
+
+[tool.hatch.build.targets.wheel]
+packages = ["hdfa"]
+artifacts = [
+  "src/hdfa/*.py",
+  "src/hdfa/*.conf",
+  "src/hdfa/*.json",
+  "src/hdfa/*.html"
+]
+
+[tool.hatch.build.targets.sdist]
+ignore-vcs = true
+include = [
+  "src/hdfa/*.py",
+  "src/hdfa/*.conf",
+  "src/hdfa/*.json",
+  "src/hdfa/*.html"
+]
+
+[tool.coverage.run]
+source_pkgs = ["hdfa"]
+branch = true
+parallel = true
+omit = [
+  "__about__.py",
+]
+
+[tool.coverage.paths]
+hdfa = ["src/hdfa"]
+tests = ["src/hdfa"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+allow-ambiguous-features = true

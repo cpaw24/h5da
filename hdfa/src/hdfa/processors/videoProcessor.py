@@ -4,7 +4,6 @@ import tarfile
 import zipfile
 from typing import AnyStr, List
 import numpy as np
-import h5py as h5
 from skvideo import io as vio
 
 class VideoProcessor:

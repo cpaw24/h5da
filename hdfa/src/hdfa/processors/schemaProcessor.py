@@ -1,4 +1,5 @@
 import json
+import re
 import h5py as h5
 from typing import AnyStr, List, Tuple, Dict
 
@@ -96,23 +97,28 @@ class SchemaProcessor:
         for group, content in zip(groups, leaf_content):
            """ Check if content key is in classification keys and if it's in the group key."""
            """ Performs a fuzzy or exact match depending upon the structure of the schema."""
-           if (content.key() in group.key()) and (content.key() in classification_keys):
-              file_path =  group.value()
-              source = leaf_content[content.key()]['sources']
-              if source in image_types:
-                 content_type = 'image'
-              elif source in video_types:
-                 content_type = 'video'
-           elif group.key() in classification_keys:
-               file_path =  group.value()
-               source = leaf_content[group.key()]['sources']
-               if source in image_types:
-                  content_type = 'image'
-               elif source in video_types:
-                  content_type = 'video'
-               else:
-                  content_type = group.key()
+           is_valid_content_key = re.search(r"(.*)(\\w+)(.*)", content.key())
+           is_valid_class_key = re.search(r"(.*)(\\w+)(.*)", str([ck for ck in classification_keys]))
+           is_valid_group_key = re.search(r"(.*)(\\w+)(.*)", group.key())
+           if is_valid_content_key and is_valid_class_key and is_valid_group_key:
+              if (content.key() in re.search(r"(.*)(\\w+)", group.key())
+                     and (content.key() in re.search(r"(.*)(\\w+)", str([kc for kc in classification_keys])))):
+                 file_path =  group.value()
+                 source = leaf_content[content.key()]['sources']
+                 if source in image_types:
+                    content_type = 'image'
+                 elif source in video_types:
+                    content_type = 'video'
+              elif group.key() in re.search(r"(.*)(\\w+)", str([clk for clk in classification_keys])):
+                 file_path =  group.value()
+                 source = leaf_content[group.key()]['sources']
+                 if source in image_types:
+                    content_type = 'image'
+                 elif source in video_types:
+                    content_type = 'video'
+                 else:
+                    content_type = group.key()
 
-                  return content.key, file_path, content_type
-           else:
-              return None, None, None
+                    return content.key, file_path, content_type
+              else:
+                 return None, None, None

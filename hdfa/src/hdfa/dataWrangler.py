@@ -3,18 +3,18 @@ import io
 import math
 import time
 import signal
-from parsingProcessor import ParsingProcessor
-from imageProcessor import ImageProcessor
-from schemaProcessor import SchemaProcessor
-from videoProcessor import VideoProcessor
-from textFileProcessor import TextFileProcessor
+from src.hdfa.processors.parsingProcessor import ParsingProcessor
+from src.hdfa.processors.imageProcessor import ImageProcessor
+from src.hdfa.processors.schemaProcessor import SchemaProcessor
+from src.hdfa.processors.videoProcessor import VideoProcessor
+from src.hdfa.processors.textFileProcessor import TextFileProcessor
 import multiprocessing
 import os
 import uuid
 import tarfile
 import zipfile
 from datetime import datetime
-from hdfa.mpLocal import MpQLocal
+from src.hdfa.processors.tools.mpLocal import MpQLocal
 import h5py as h5
 from zipfile import ZipFile
 from typing import Any, AnyStr, Dict, List, Tuple
@@ -255,7 +255,9 @@ class DataProcessor:
                 file = open_file.name + '.jpeg'
                 open_file.close()
                 open_file = self._file_io_buffer(file)
-                file = open_file.name
+                content_list, processed_file_list = self._img_processor.convert_images(file, open_file,
+                                                                                       content_list,
+                                                                                       processed_file_list)
         try:
             if not file.endswith('/'):
                 """ Process JSON files """

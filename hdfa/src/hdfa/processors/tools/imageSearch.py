@@ -1,12 +1,13 @@
 import os
 import logging
+import h5
 import h5rdmtoolbox as h5tbx
 import lmdb
 import json
 from click import open_file
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
-from dataWrangler import DataProcessor
+from src.hdfa.dataWrangler import DataProcessor
 from typing import AnyStr, List, Tuple
 import numpy as np
 from PIL import Image
@@ -15,7 +16,7 @@ import tifffile
 
 class SearchImages:
     """Not Implemented."""
-    def __init__(self, input_file: AnyStr, searched_files: List, use_path: AnyStr = os.getcwd(), config_file: AnyStr = None):
+    def __init__(self, input_file: h5.File.name, searched_files: List, use_path: AnyStr = os.getcwd(), config_file: AnyStr = None):
         self.__input_file = input_file
         self.__use_path = use_path
         self.__searched_files = searched_files
@@ -35,12 +36,16 @@ class SearchImages:
     def __store_index(self, source_data: Tuple) -> bool | None:
         try:
             with self.idx_db.begin(write=True).cursor() as txn:
-                i, k, v = source_data
-                txn.put(bytes(k, v))
-                txn.commit()
-                return True
+               if len(source_data) == 3:
+                  k, v, i = source_data
+               elif len(source_data) == 2:
+                  k, v = source_data
+
+                  txn.put(k, v)
+                  txn.commit()
+                  return True
         except Exception as e:
-            print(e)
+            print(f"__store_index Exception:{e}")
             txn.rollback()
             self.idx_db.close()
             return False
@@ -90,14 +95,14 @@ class SearchImages:
               finally:
                  os.remove(temp_img)
 
-    def __iterate_source(self):
+    def __iterate_dataset_source(self):
         with self.H5File.__iter__():
             for k, v in self.H5File:
                 if isinstance(v, h5tbx.Dataset):
                    yield k, hash(v)
 
     def __exact_match(self):
-        source_file_list = list(self.__iterate_source())
+        source_file_list = list(self.__iterate_dataset_source())
         for row in source_file_list:
             k, v = row
             for k1, v1 in self.idx_db.open_db(read=True).cursor():

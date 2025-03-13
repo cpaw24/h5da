@@ -31,19 +31,28 @@ The "samples" folder contains examples for each and scripts on sample usage.
 
 Docs with more detail on classes and functions can be found:
 
-[dataWrangler](hdfa/src/hdfa/htmldoc/dataWrangler.html)
+[dataWrangler](hdfa/src/hdfa/processors/htmldoc/dataWrangler.html)
 
-[dataRetriever](hdfa/src/hdfa/htmldoc/dataRetriever.html)
+[dataRetriever](hdfa/src/hdfa/processors/htmldoc/dataRetriever.html)
 
-[imageProcessor](hdfa/src/hdfa/htmldoc/imageProcessor.html)
+[imageProcessor](hdfa/src/hdfa/processors/htmldoc/imageProcessor.html)
 
-[videoProcessor](hdfa/src/hdfa/htmldoc/videoProcessor.html)
+[videoProcessor](hdfa/src/hdfa/processors/htmldoc/videoProcessor.html)
 
-[schemaProcessor](hdfa/src/hdfa/htmldoc/schemaProcessor.html)
+[schemaProcessor](hdfa/src/hdfa/processors/htmldoc/schemaProcessor.html)
 
-[parsingProcessor](hdfa/src/hdfa/htmldoc/parsingProcessor.html)
+[parsingProcessor](hdfa/src/hdfa/processors/htmldoc/parsingProcessor.html)
 
-[textFileProcessor](hdfa/src/hdfa/htmldoc/textFileProcessor.html)
+[textFileProcessor](hdfa/src/hdfa/processors/htmldoc/textFileProcessor.html)
 
-[mpLocal](hdfa/src/hdfa/htmldoc/mpLocal.html)
+[mpLocal](hdfa/src/hdfa/processors/htmldoc/mpLocal.html)
+
+***Testing***
+
+Functional testing has been done with the content types that are supported. In addition
+there was some throughput testing with the [Fashion-Dataset](https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-dataset)
+sourced from Kaggle. That particular dataset was downloaded, and archives created in both zip and tarfile gzip (tar.gz) formats. The 
+multi-processing,buffering, and batching proved effective as the 177k+ files(jpeg, csv, json) were converted(numpy, strings) to datasets(batches of 5k). 
+It was a single execution on a MacBook Pro(2024): 14-inch M4 Pro(12 cores), 24GB RAM, 500GB internal + 2TB external storage,
+with a runtime of 30 hours 34 minutes. The execution consumed one cpu core the entire time, using approx. 1.6-2G of RAM/VM.
 

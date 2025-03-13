@@ -1,6 +1,5 @@
 from typing import AnyStr, List, Tuple
 import gzip
-import h5
 import tarfile
 import zipfile
 import json

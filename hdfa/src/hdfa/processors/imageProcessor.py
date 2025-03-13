@@ -1,5 +1,4 @@
 import zipfile
-import h5
 import gzip
 import tifffile
 import tarfile

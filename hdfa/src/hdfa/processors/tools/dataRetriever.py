@@ -44,7 +44,7 @@ class DataRetriever:
         dataset_data_list = self.retrieve_dataset_list()
         return (group_data_list, dataset_data_list)
 
-    def retrieve_group_attrs_data(self) -> List[Dict]:
+    def retrieve_all_group_attrs_data(self) -> List[Dict]:
         """Retrieves all group attributes from the input file."""
         attrs_list: List = []
         groups = self.retrieve_group_list()
