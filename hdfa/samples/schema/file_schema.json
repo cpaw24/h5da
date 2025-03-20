@@ -52,7 +52,7 @@
           ]
     },
       "styles/": {
-        "sources": ["json"]
+        "sources": ["json", "csv"]
         },
       "video/": {
          "sources": [

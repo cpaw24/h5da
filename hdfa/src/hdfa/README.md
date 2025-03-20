@@ -55,4 +55,5 @@ sourced from Kaggle. That particular dataset was downloaded, and archives create
 multi-processing,buffering, and batching proved effective as the 177k+ files(jpeg, csv, json) were converted(numpy, strings) to datasets(batches of 5k). 
 It was a single execution on a MacBook Pro(2024): 14-inch M4 Pro(12 cores), 24GB RAM, 500GB internal + 2TB external storage,
 with a runtime of 30 hours 34 minutes. The execution consumed one cpu core the entire time, using approx. 1.6-2G of RAM/VM.
+The resulting file size was approx. 174GB.
 
