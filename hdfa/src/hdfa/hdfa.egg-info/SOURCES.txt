@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+hdfa.egg-info/PKG-INFO
+hdfa.egg-info/SOURCES.txt
+hdfa.egg-info/dependency_links.txt
+hdfa.egg-info/requires.txt
+hdfa.egg-info/top_level.txt
+processors/__init__.py
+processors/imageProcessor.py
+processors/parsingProcessor.py
+processors/schemaProcessor.py
+processors/textFileProcessor.py
+processors/videoProcessor.py
+processors/tools/__init__.py
+processors/tools/dataRetriever.py
+processors/tools/imageSearch.py
+processors/tools/mpLocal.py
