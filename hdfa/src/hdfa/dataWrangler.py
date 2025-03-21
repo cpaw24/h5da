@@ -236,18 +236,20 @@ class DataProcessor:
 
     def classify_inputs(self, file: AnyStr | io.BytesIO,
                         open_file: ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
-                        process_q: multiprocessing.Queue) -> None:
+                        process_q: multiprocessing.Queue, group_keys: List = None) -> None:
+
         """Classify and process input file content into structured data formats. Valid inputs types are JSON, CSV,
-        video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO.
-        Add results to multiprocessing.Queue.
-        :param file: Path to the input file in archive (e.g., .zip, .gz, .h5).
-        :param open_file: ZipFile, Gzip, Tarfile, h5.File, and BytesIO object.
-        :param process_q: multiprocessing.Queue
-        :return: None"""
+			video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO.
+			Add results to multiprocessing.Queue.
+			:param file: Path to the input file in archive (e.g., .zip, .gz, .h5).
+			:param open_file: ZipFile, Gzip, Tarfile, h5.File, and BytesIO object.
+			:param process_q: multiprocessing.Queue
+			:return: None"""
         content_list: List = []
-        processed_file_list: List[str] = []
+        processed_file_list: List = []
         image_extensions = self.__config_dict.get('image_extensions')
         video_extensions = self.__config_dict.get('video_extensions')
+
         if isinstance(open_file, io.BytesIO):
             io_file = open_file.getbuffer()
             if max(io_file.suboffsets) >= 1:
@@ -259,29 +261,42 @@ class DataProcessor:
                                                                                        content_list,
                                                                                        processed_file_list)
         try:
+            group = group_keys[0]
+            group_content = group_keys[1]
+            file_location = group_keys[2]
+
             if not file.endswith('/'):
                 """ Process JSON files """
-                if file.endswith('json') or file.endswith('jsonl'):
+                if file.endswith('json') or file.endswith('jsonl') and ('json' or 'jsonl') in group_content:
                     content_list, processed_file_list = self._txt_processor.process_json(file, open_file,
                                                                           content_list, processed_file_list)
                     if content_list and processed_file_list:
+                       processed_file_list.append([f"file_group: {group}",
+                                                   f"location: {file_location}"])
                        process_q.put([content_list, processed_file_list, file])
                     """ Process image files """
-                elif file.split('.')[-1] in image_extensions:
+                elif file.split('.')[-1] in image_extensions and file.split('.')[-1] in group_content:
                     content_list, processed_file_list = self._img_processor.convert_images(file, open_file,
                                                                             content_list, processed_file_list)
-                    process_q.put([content_list, processed_file_list, file])
+                    if content_list and processed_file_list:
+                        processed_file_list.append([f"file_group: {group}",
+                                                    f"location: {file_location}"])
+                        process_q.put([content_list, processed_file_list, file])
                     """ Process CSV files """
-                elif file.endswith('csv'):
+                elif file.endswith('csv') or file.split('.')[-1] in group_content:
                     content_list, processed_file_list = self._txt_processor.process_csv(file, open_file,
                                                                          content_list, processed_file_list)
                     if content_list and processed_file_list:
+                       processed_file_list.append([f"file_group: {group}",
+                                                   f"location: {file_location}"])
                        process_q.put([content_list, processed_file_list, file])
                     """ Process video files """
-                elif file.split('.')[-1] in video_extensions:
+                elif file.split('.')[-1] in video_extensions or file.split('.')[-1] in group_content:
                     content_list, processed_file_list = self._vid_processor.process_video(file, open_file,
                                                                            content_list, processed_file_list)
                     if content_list and processed_file_list:
+                       processed_file_list.append([f"file_group: {group}",
+                                                   f"location: {file_location}"])
                        process_q.put([content_list, processed_file_list, file])
 
         except Exception as e:
@@ -352,7 +367,7 @@ class DataProcessor:
                        file_input: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
                        file_list: List,
                        process_q: multiprocessing.Queue, batch_process_limit: int = None,
-                       batch_chunk_size: int = None) -> None:
+                       batch_chunk_size: int = None, group_keys: List = None) -> None:
         """Process input files in batches calculated from __size_batching to manage memory consumption.
         Batch limits are set in the hdfs=config.json file.
         :param file_input can be a ZipFile, GzipFile, Tarfile, h5.File, or BytesIO object.
@@ -364,9 +379,9 @@ class DataProcessor:
             if not batch_process_limit:
                 batch_process_limit = self.__config_dict.get('batch_process_limit')
 
-            if not file_list:
+            if len(file_list) == 1:
                 if self.__input_file.split('.')[-1] in allowed_types:
-                    self.classify_inputs(file_input, file_input, process_q)
+                    self.classify_inputs(file_input, file_input, process_q, group_keys)
             else:
                 batch_list = self._size_batching(file_list, batch_chunk_size)
                 file_sz = len(file_list)
@@ -377,22 +392,22 @@ class DataProcessor:
                     for file in batch:
                         if not file.endswith('/') and file.split('.')[-1] in allowed_types:
                           f_counter += 1
-                          print(f""" Processing file {file}, file count {f_counter} in slice {len(batch)} in batch {b_counter} """)
-                          self.classify_inputs(file, file_input, process_q)
+                          print(f""" Processing file {file}, file count {f_counter} in slice {len(batch)} of batch {b_counter} """)
+                          self.classify_inputs(file, file_input, process_q, group_keys)
                         else:
                            print(f"Skipping: {file}")
                            continue
                     b_counter += 1
                     print(f""" Process data in {batch_process_limit * batch_chunk_size} files per batch, managing host memory consumption """)
-                    print(f"Batch {b_counter} of {len(batch)} at {datetime.now()}")
+                    print(f"Batch {b_counter} of {len(batch_list)} at {datetime.now()}")
 
                     """ Below when batch counter matches the process_limit, begin writing to h5 file"""
                     """ This will clear the contents of the queue and write to the h5 file """
                     if b_counter == batch_process_limit:
-                        self.data_handler(process_q, file_group=file.split('/')[0], file_list=file_list)
+                        self.data_handler(process_q, file_group=file.split('/')[0], file_list=file_list, group_keys=group_keys)
                         b_counter = 0
                     elif batch_list[-1] == batch:
-                        self.data_handler(process_q, file_group=file.split('/')[0], file_list=file_list)
+                        self.data_handler(process_q, file_group=file.split('/')[0], file_list=file_list, group_keys=group_keys)
                         b_counter = 0
                 total_batch_count = b_counter + 1
                 print(f"Total batches processed: {total_batch_count}")
@@ -401,10 +416,8 @@ class DataProcessor:
                     print(f"Total batches processed: {total_batch_count}")
                     print(f"Total files processed: {file_sz}")
                     print(f"Total files in queue: {process_q.qsize()}")
-                    print(f"Total files in h5 file: {len(self._get_file_group(file_input, file.split('/')[0]))}")
                     print(f"Total bytes in input file: {os.path.getsize(self.__input_file)}")
                     print(f"Total bytes in queue: {process_q.qsize() * 1024}")
-                    print(f"Total bytes in h5 file: {self._get_file_group(file_input, file.split('/')[0]).attrs['content_size'] * 1024}")
                     print(f"Total bytes in input file: {os.path.getsize(self.__input_file) * 1024}")
 
         except Exception as e:
@@ -421,7 +434,7 @@ class DataProcessor:
             file_buffer = io.BytesIO(bytes_content)
             return file_buffer
 
-    def input_file_type(self, process_q: multiprocessing.Queue, batch_process_limit: int) -> str | None:
+    def input_file_type(self, process_q: multiprocessing.Queue, batch_process_limit: int, group_keys: List) -> str | None:
         """Determine the type of input file accordingly. Valid input types are ZIP, HDF5, TAR, and GZIP. Send file to
         self.__process_batch to create a sliced list of files
         :param process_q: multiprocessing.Queue
@@ -431,25 +444,28 @@ class DataProcessor:
                 file_buffer = self._file_io_buffer(self.__input_file)
                 zipped = zipfile.ZipFile(file_buffer, 'r', allowZip64=True)
                 file_list = zipped.namelist()
-                self._process_batch(zipped, file_list, process_q, batch_process_limit)
+                self._process_batch(file_input=zipped, file_list=file_list, process_q=process_q,
+                                    batch_process_limit=batch_process_limit, group_keys=group_keys)
 
             elif self.__input_file.endswith('tar.gz') | self.__input_file.endswith('tar'):
                 """Provide custom buffer size for tar files to get more efficient reads."""
                 with tarfile.open(self.__input_file, 'r', bufsize=(1024 * 1024 * 400)) as tar:
                     file_list = self.file_list(tar)
-                    self._process_batch(tar, file_list, process_q, batch_process_limit)
+                    self._process_batch(file_input=tar, file_list=file_list, process_q=process_q,
+                                        batch_process_limit=batch_process_limit, group_keys=group_keys)
 
             elif self.__input_file.endswith('gz' or 'gzip'):
                 file_buffer = self._file_io_buffer(self.__input_file)
                 file_list = self.file_list(file_buffer)
-                self._process_batch(file_buffer, file_list, process_q, batch_process_limit)
+                self._process_batch(file_input=file_buffer, file_list=file_list, process_q=process_q,
+                                    batch_process_limit=batch_process_limit, group_keys=group_keys)
 
             else:
                 """If input file is not a ZIP, HDF5, TAR, or GZIP file, process the entire file as a single file."""
                 file_list = []
                 file_buffer = self._file_io_buffer(self.__input_file)
                 self._process_batch(file_input=file_buffer, file_list=file_list,
-                                    process_q=process_q, batch_process_limit=batch_process_limit)
+                                    process_q=process_q, batch_process_limit=batch_process_limit, group_keys=group_keys)
 
         except Exception as e:
             print(f'_input_file_type Exception: {e, e.args}')
@@ -484,7 +500,7 @@ class DataProcessor:
         self.create_dataset_from_input(h5_file=h5_file, data=content_list, file_group=file_group, file=file)
         self._flush_content_to_file(h5_file=h5_file)
 
-    def data_handler(self, process_q: multiprocessing.Queue, file_group: AnyStr, file_list: AnyStr) -> None:
+    def data_handler(self, process_q: multiprocessing.Queue, file_group: AnyStr, file_list: AnyStr, group_keys: List = None) -> None:
         """While there is content in the queue, process it and write to the HDF5 file.
         If the queue is empty, write the schema to the HDF5 file.
         If the queue is empty and the file list is empty, write the root attributes to the HDF5 file.
@@ -493,6 +509,7 @@ class DataProcessor:
         :param file_group: str
         Tuples of lists and files are returned from the queue each iteration."""
         try:
+            file_group, file_content, file_location = group_keys
             h5_file = h5.File(self.__output_file, mode=self.__write_mode)
             while not process_q.empty():
                for data in process_q.get():
@@ -511,7 +528,6 @@ class DataProcessor:
                         file_name = data[0]
                         self.update_file_group(h5_file=h5_file, file_group=file_group,
                                                attr='file-name', attr_value=file_name)
-
                         if not isinstance(content_list, np.ndarray) and content_list and file_list and not file_group:
                            for contents, file in content_list, file_list:
                               for file_group, content_lines in contents:
@@ -551,29 +567,28 @@ class DataProcessor:
             h5_file = h5.File(self.__output_file, mode=self.__write_mode)
             paths, process_q, local_mpq = self._process_schema_input(h5_file)
             for gkey in group_keys:
-                path = [p for p in paths if p[0].endswith(gkey)]
-            else:
-                print("No schema file found - using defaults")
+                key = self._schema_processor.map_schema_classifications(classification_key=gkey,
+                                                                        schema_d=self.__schema_dict)
+                if process_q.empty() and key:
+                    self._flush_content_to_file(h5_file)
+                    """ Close the file to avoid locking error when processing input file type.
+                    The schema write already has the file open."""
+                    h5_file.close()
+                    """ File will be opened again below"""
+                    self.input_file_type(process_q=process_q, batch_process_limit=batch_process_limit, group_keys=key)
+                    """ flush memory content to disk """
+                    h5_file.flush()
+                    """ flush memory content to disk """
+                elif self.__input_dict:
+                    content_list = [self.__input_dict]
+                    file_list: List = []
+                    file_group = 'root'
+                    process_q.put([file_group, content_list, file_list])
+                    self.data_handler(file_group=file_group, file_list=file_list, process_q=process_q)
 
-            if process_q.empty():
-                self._flush_content_to_file(h5_file)
-                """ Close the file to avoid locking error when processing input file type.
-                The schema write already has the file open."""
-                h5_file.close()
-                """ File will be opened again below"""
-                self.input_file_type(process_q, batch_process_limit)
-                h5_file.flush()
-                """ flush memory content to disk """
-            elif self.__input_dict:
-                content_list = [self.__input_dict]
-                file_list: List = []
-                file_group = 'root'
-                process_q.put([file_group, content_list, file_list])
-                self.data_handler(file_group=file_group, file_list=file_list, process_q=process_q)
-
-            """ Shutdown of Queue and Process """
-            if process_q.empty():
-                local_mpq.current_process.close()
+                """ Shutdown of Queue and Process """
+                if process_q.empty():
+                    local_mpq.current_process.close()
 
         except Exception as e:
             print(f'start_processor Exception: {e, e.args}')

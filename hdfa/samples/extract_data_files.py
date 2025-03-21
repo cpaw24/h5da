@@ -2,8 +2,8 @@ from src.hdfa.dataWrangler import DataProcessor
 
 # Extract constants for hardcoded paths to make the code more maintainable
 INPUT_FILE_PATH = "//Volumes//ExtShield//datasets//fashion-dataset.zip"
-SCHEMA_FILE_PATH = "/file_schema.json"
-CONFIG_FILE_PATH = "/hdfa-config.json"
+SCHEMA_FILE_PATH = "schema/file_schema.json"
+CONFIG_FILE_PATH = "./hdfa-config.json"
 OUTPUT_DIR = "//Volumes//ExtShield//datasets//hdfa_files"
 BATCH_PROCESS_LIMIT = 5
 
@@ -25,6 +25,6 @@ def initialize_data_processor(input_file: str, schema_file: str, config_file: st
 
 # Main logic
 data_processor = initialize_data_processor(INPUT_FILE_PATH, SCHEMA_FILE_PATH, CONFIG_FILE_PATH, OUTPUT_DIR)
-keys = data_processor.start_processors(group_keys=["images/", "styles/"], batch_process_limit=BATCH_PROCESS_LIMIT)
+keys = data_processor.start_processors(group_keys=["images", "styles"], batch_process_limit=BATCH_PROCESS_LIMIT)
 
 
