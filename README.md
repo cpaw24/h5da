@@ -30,21 +30,21 @@ The "samples" folder contains examples for each and scripts on sample usage.
 
 Docs with more detail on classes and functions can be found:
 
-[dataWrangler](src/hdfa/processors/htmldoc/dataWrangler.html)
+[dataWrangler](hdfa/src/hdfa/processors/htmldoc/dataWrangler.html)
 
-[dataRetriever](src/hdfa/processors/htmldoc/dataRetriever.html)
+[dataRetriever](hdfa/src/hdfa/processors/htmldoc/dataRetriever.html)
 
-[imageProcessor](src/hdfa/processors/htmldoc/imageProcessor.html)
+[imageProcessor](hdfa/src/hdfa/processors/htmldoc/imageProcessor.html)
 
-[videoProcessor](src/hdfa/processors/htmldoc/videoProcessor.html)
+[videoProcessor](hdfa/src/hdfa/processors/htmldoc/videoProcessor.html)
 
-[schemaProcessor](src/hdfa/processors/htmldoc/schemaProcessor.html)
+[schemaProcessor](hdfa/src/hdfa/processors/htmldoc/schemaProcessor.html)
 
-[parsingProcessor](src/hdfa/processors/htmldoc/parsingProcessor.html)
+[parsingProcessor](hdfa/src/hdfa/processors/htmldoc/parsingProcessor.html)
 
-[textFileProcessor](src/hdfa/processors/htmldoc/textFileProcessor.html)
+[textFileProcessor](hdfa/src/hdfa/processors/htmldoc/textFileProcessor.html)
 
-[mpLocal](src/hdfa/processors/htmldoc/mpLocal.html)
+[mpLocal](hdfa/src/hdfa/processors/htmldoc/mpLocal.html)
 
 ***Testing***
 
