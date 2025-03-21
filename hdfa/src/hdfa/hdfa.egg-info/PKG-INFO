@@ -62,7 +62,6 @@ handler and processing control between different content types. It also handles 
 
 The simple overview process is below
 
-
     input file --> read--> convert --> publish tuples to mp.queue --> deque --> write to HDF5
 
 The contained code is an attempt at creating some processing structure when dealing with HDF5 files.
@@ -103,6 +102,9 @@ there was some throughput testing with the [Fashion-Dataset](https://www.kaggle.
 sourced from Kaggle. That particular dataset was downloaded, and archives created in both zip and tarfile gzip (tar.gz) formats. The 
 multi-processing,buffering, and batching proved effective as the 177k+ files(jpeg, csv, json) were converted(numpy, strings) to datasets(batches of 5k). 
 It was a single execution on a MacBook Pro(2024): 14-inch M4 Pro(12 cores), 24GB RAM, 500GB internal + 2TB external storage,
-with a runtime of 30 hours 34 minutes. The execution consumed one cpu core the entire time, using approx. 1.6-2G of RAM/VM.
-The resulting file size was approx. 174GB.
+with a runtime of 34 hours 21 minutes. The execution consumed one cpu core the entire time, using approx. 1.6-2G of RAM, but
+up to 80GB of VM. The resulting file size was approx. 174GB.
+
+A custom schema input was also used(samples/file_schema.json), in order to classify the files by file type. It provides a basic
+mapping mechanism for taking an input parameter and mapping it to a group within the destination HDF5. 
 
