@@ -1,8 +1,6 @@
 # H5DAT
 HDF5 Data Access Toolkit for Python 
 
-***Work In Progress -- not everything is stable***
-
 The overall design of the processing uses batches in combination with the multi-processing(mp) 
 Python module to manage processes and resources. Each content "classification" is contained within 
 it's own class, e.g. **ImageProcessor, VideoProcessor, TextFileProcessor**, etc. 
