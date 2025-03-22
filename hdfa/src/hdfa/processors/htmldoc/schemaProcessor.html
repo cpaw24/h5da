@@ -78,7 +78,7 @@ el.replaceWith(d);
                     output_groups = file_name.get(&#39;groups&#39;)
                     if output_groups:
                         for k, v in output_groups.items():
-                            out_path_list.append([v])
+                            out_path_list.append([k])
                 else:
                     print(&#34;No output schema to process&#34;)
         return in_path_list, out_path_list
@@ -137,37 +137,29 @@ el.replaceWith(d);
         except Exception as e:
             print(f&#39;process_schema_file Exception: {e, e.args}&#39;)
 
-    def map_schema_classifications(self, classification_keys: List, schema_d: Dict, config_d: Dict) -&gt; Tuple:
-        &#34;&#34;&#34;Not Implemented&#34;&#34;&#34;
+    def map_schema_classifications(self, classification_key: AnyStr, schema_d: Dict) -&gt; List[str] | None:
         &#34;&#34;&#34; Get content type, file path, and key from schema and user classification keys. &#34;&#34;&#34;
-        image_types = config_d[&#39;image_extensions&#39;]
-        video_types = config_d[&#39;video_extensions&#39;]
-        groups = schema_d[&#39;files&#39;][&#39;outgoing&#39;][self.__output_file.split(&#39;/&#39;)[-1]][&#39;groups&#39;]
-        leaf_content = schema_d[&#39;files&#39;][&#39;outgoing&#39;][self.__output_file.split(&#39;/&#39;)[-1]][&#39;leaf_content&#39;]
+        return_list: List = []
+        file = self.__output_file.split(&#39;/&#39;)[-1]
+        groups = schema_d[&#39;files&#39;][&#39;outgoing&#39;][file][&#39;groups&#39;]
+        leaf_content = schema_d[&#39;files&#39;][&#39;outgoing&#39;][&#39;leaf_content&#39;]
+        location_map = schema_d[&#39;files&#39;][&#39;outgoing&#39;][&#39;location_leaf_map&#39;]
+        key = classification_key
+        for kg, vg in groups.items():
+           if key in kg:
+              file_group_key = vg
+              file_group = kg
+        for leaf in leaf_content:
+           if key == leaf:
+              file_leaf_content = leaf_content[leaf][&#34;sources&#34;]
+        for k, v in location_map.items():
+           if key == k:
+              file_location = v
 
-        for group, content in zip(groups, leaf_content):
-           &#34;&#34;&#34; Check if content key is in classification keys and if it&#39;s in the group key.&#34;&#34;&#34;
-           &#34;&#34;&#34; Performs a fuzzy or exact match depending upon the structure of the schema.&#34;&#34;&#34;
-           if (content.key() in group.key()) and (content.key() in classification_keys):
-              file_path =  group.value()
-              source = leaf_content[content.key()][&#39;sources&#39;]
-              if source in image_types:
-                 content_type = &#39;image&#39;
-              elif source in video_types:
-                 content_type = &#39;video&#39;
-           elif group.key() in classification_keys:
-               file_path =  group.value()
-               source = leaf_content[group.key()][&#39;sources&#39;]
-               if source in image_types:
-                  content_type = &#39;image&#39;
-               elif source in video_types:
-                  content_type = &#39;video&#39;
-               else:
-                  content_type = group.key()
-
-                  return content.key, file_path, content_type
-           else:
-              return None, None, None</code></pre>
+              if file_group_key == file_location:
+                 return [f&#34;{classification_key}: {file_group}&#34;,
+                          f&#34;{classification_key}-content: {file_leaf_content}&#34;,
+                          f&#34;{classification_key}-location: {file_location}&#34;]</code></pre>
 </details>
 <div class="desc"></div>
 <h3>Methods</h3>
@@ -197,7 +189,7 @@ el.replaceWith(d);
                 output_groups = file_name.get(&#39;groups&#39;)
                 if output_groups:
                     for k, v in output_groups.items():
-                        out_path_list.append([v])
+                        out_path_list.append([k])
             else:
                 print(&#34;No output schema to process&#34;)
     return in_path_list, out_path_list</code></pre>
@@ -206,46 +198,38 @@ el.replaceWith(d);
 :returns tuple of input and output paths from schema file</p></div>
 </dd>
 <dt id="schemaProcessor.SchemaProcessor.map_schema_classifications"><code class="name flex">
-<span>def <span class="ident">map_schema_classifications</span></span>(<span>self, classification_keys: List, schema_d: Dict, config_d: Dict) ‑> Tuple</span>
+<span>def <span class="ident">map_schema_classifications</span></span>(<span>self, classification_key: ~AnyStr, schema_d: Dict) ‑> List[str] | None</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def map_schema_classifications(self, classification_keys: List, schema_d: Dict, config_d: Dict) -&gt; Tuple:
-    &#34;&#34;&#34;Not Implemented&#34;&#34;&#34;
+<pre><code class="python">def map_schema_classifications(self, classification_key: AnyStr, schema_d: Dict) -&gt; List[str] | None:
     &#34;&#34;&#34; Get content type, file path, and key from schema and user classification keys. &#34;&#34;&#34;
-    image_types = config_d[&#39;image_extensions&#39;]
-    video_types = config_d[&#39;video_extensions&#39;]
-    groups = schema_d[&#39;files&#39;][&#39;outgoing&#39;][self.__output_file.split(&#39;/&#39;)[-1]][&#39;groups&#39;]
-    leaf_content = schema_d[&#39;files&#39;][&#39;outgoing&#39;][self.__output_file.split(&#39;/&#39;)[-1]][&#39;leaf_content&#39;]
+    return_list: List = []
+    file = self.__output_file.split(&#39;/&#39;)[-1]
+    groups = schema_d[&#39;files&#39;][&#39;outgoing&#39;][file][&#39;groups&#39;]
+    leaf_content = schema_d[&#39;files&#39;][&#39;outgoing&#39;][&#39;leaf_content&#39;]
+    location_map = schema_d[&#39;files&#39;][&#39;outgoing&#39;][&#39;location_leaf_map&#39;]
+    key = classification_key
+    for kg, vg in groups.items():
+       if key in kg:
+          file_group_key = vg
+          file_group = kg
+    for leaf in leaf_content:
+       if key == leaf:
+          file_leaf_content = leaf_content[leaf][&#34;sources&#34;]
+    for k, v in location_map.items():
+       if key == k:
+          file_location = v
 
-    for group, content in zip(groups, leaf_content):
-       &#34;&#34;&#34; Check if content key is in classification keys and if it&#39;s in the group key.&#34;&#34;&#34;
-       &#34;&#34;&#34; Performs a fuzzy or exact match depending upon the structure of the schema.&#34;&#34;&#34;
-       if (content.key() in group.key()) and (content.key() in classification_keys):
-          file_path =  group.value()
-          source = leaf_content[content.key()][&#39;sources&#39;]
-          if source in image_types:
-             content_type = &#39;image&#39;
-          elif source in video_types:
-             content_type = &#39;video&#39;
-       elif group.key() in classification_keys:
-           file_path =  group.value()
-           source = leaf_content[group.key()][&#39;sources&#39;]
-           if source in image_types:
-              content_type = &#39;image&#39;
-           elif source in video_types:
-              content_type = &#39;video&#39;
-           else:
-              content_type = group.key()
-
-              return content.key, file_path, content_type
-       else:
-          return None, None, None</code></pre>
+          if file_group_key == file_location:
+             return [f&#34;{classification_key}: {file_group}&#34;,
+                      f&#34;{classification_key}-content: {file_leaf_content}&#34;,
+                      f&#34;{classification_key}-location: {file_location}&#34;]</code></pre>
 </details>
-<div class="desc"><p>Not Implemented</p></div>
+<div class="desc"><p>Get content type, file path, and key from schema and user classification keys.</p></div>
 </dd>
 <dt id="schemaProcessor.SchemaProcessor.process_schema_file"><code class="name flex">
 <span>def <span class="ident">process_schema_file</span></span>(<span>self,<br>h5_file: h5py._hl.files.File,<br>content_list: List = None,<br>processed_file_list: List = None) ‑> List | str | None</span>

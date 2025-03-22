@@ -120,9 +120,9 @@ el.replaceWith(d);
         return isinstance(lst, list) and len(lst) == size
 
     def process_row(self, row) -&gt; List | None:
-        &#34;&#34;&#34;Process a single row and return formatted strings.
+        &#34;&#34;&#34;Process row(s) and return formatted strings. Support for nested lists.
         :param row: List of key-value pairs.
-        :return: List of formatted strings.&#34;&#34;&#34;
+        :return: List of formatted strings or None.&#34;&#34;&#34;
         list_size_single: int = 1  # Constant for list size one
         list_size_double: int = 2  # Constant for list of two elements
         list_size_triple: int = 3  # Constant for list size three
@@ -332,9 +332,9 @@ data into a list of key-value pairs.
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_row(self, row) -&gt; List | None:
-    &#34;&#34;&#34;Process a single row and return formatted strings.
+    &#34;&#34;&#34;Process row(s) and return formatted strings. Support for nested lists.
     :param row: List of key-value pairs.
-    :return: List of formatted strings.&#34;&#34;&#34;
+    :return: List of formatted strings or None.&#34;&#34;&#34;
     list_size_single: int = 1  # Constant for list size one
     list_size_double: int = 2  # Constant for list of two elements
     list_size_triple: int = 3  # Constant for list size three
@@ -384,9 +384,9 @@ data into a list of key-value pairs.
     except TypeError as te:
         print(f&#39;ParsingProcessor TypeError: {te, te.args}&#39;)</code></pre>
 </details>
-<div class="desc"><p>Process a single row and return formatted strings.
+<div class="desc"><p>Process row(s) and return formatted strings. Support for nested lists.
 :param row: List of key-value pairs.
-:return: List of formatted strings.</p></div>
+:return: List of formatted strings or None.</p></div>
 </dd>
 </dl>
 </dd>

@@ -163,3 +163,5 @@ cython_debug/
 # H5 Datafiles
 /hdfa/tests/archive_filestore.h5
 /qodana.yaml
+/hdfa/src/hdfa/hdfa.egg-info/
+
