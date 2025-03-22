@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.5">
+<title>dataWrangler API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>dataWrangler</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="dataWrangler.DataProcessor"><code class="flex name class">
+<span>class <span class="ident">DataProcessor</span></span>
+<span>(</span><span>output_file: ~AnyStr,<br>input_file: ~AnyStr,<br>input_dict: Dict | numpy.ndarray = None,<br>write_mode: ~AnyStr = 'a',<br>schema_file: ~AnyStr = None,<br>config_file: ~AnyStr = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DataProcessor:
+    def __init__(self, output_file: AnyStr, input_file: AnyStr,
+                 input_dict: Dict | np.ndarray = None, write_mode: AnyStr = &#39;a&#39;,
+                 schema_file: AnyStr = None, config_file: AnyStr = None) -&gt; None:
+        &#34;&#34;&#34;
+        Initialize the H5DataProcessor class.
+        :param output_file: Path to the output HDF5 file.
+        :param input_file: Path to the input file (e.g., .zip, .gz, .h5, .tar, .tar.gz).
+        :param input_dict: Optional dictionary or ndarray to process and store in the HDF5 file.
+        :param write_mode: Optional mode to write the HDF5 file. Default is &#39;a&#39; for append mode.
+        :param schema_file: Optional schema file.
+        :param config_file: Optional configuration file.
+        &#34;&#34;&#34;
+        self.__input_file = input_file
+        self.__input_dict = input_dict
+        self.__write_mode = write_mode
+        self.__schema_file = schema_file
+        self.__config_file = config_file
+        self.__output_file = output_file
+        self.__initialize()
+
+    def __initialize(self):
+        self.__h5_file = self._create_file(self.__output_file)
+        self.__schema_dict = json.load(open(self.__schema_file, &#39;r&#39;))
+        self.__config_dict = json.load(open(self.__config_file, &#39;r&#39;))
+        &#34;&#34;&#34; Initialize image, video, schema, parsing, and text processors &#34;&#34;&#34;
+        self._img_processor = ImageProcessor(self.__output_file,
+                                             schema_dict=self.__schema_dict,
+                                             config_dict=self.__config_dict)
+        self._vid_processor = VideoProcessor()
+        self._txt_processor = TextFileProcessor()
+        self._schema_processor = SchemaProcessor(output_file=self.__output_file,
+                                                 schema_file=self.__schema_file,
+                                                 config_file=self.__config_file
+        )
+        self._parsing_processor = ParsingProcessor()
+
+    @staticmethod
+    def random_int_generator() -&gt; str:
+        random_int = random.randint(1, 1000000)
+        return str(random_int)
+
+    @classmethod
+    def _create_file(cls, __output_file: AnyStr) -&gt; h5.File:
+        &#34;&#34;&#34;Create an HDF5 file. Using customized page size and buffer size to reduce memory usage.&#34;&#34;&#34;
+        &#34;&#34;&#34; Set the kwargs values for the HDF5 file creation.&#34;&#34;&#34;
+        kwarg_vals = {&#39;libver&#39;: &#39;latest&#39;, &#39;driver&#39;: &#39;core&#39;, &#39;backing_store&#39;: True, &#39;fs_persist&#39;: True,
+                      &#39;fs_strategy&#39;: &#39;page&#39;, &#39;fs_page_size&#39;: 65536, &#39;page_buf_size&#39;: 655360}
+
+        with h5tbx.File(__output_file, mode=&#39;w&#39;, **kwarg_vals) as __h5_file:
+            return __h5_file
+
+    @staticmethod
+    def _flush_content_to_file(h5_file: h5.File) -&gt; None:
+        &#34;&#34;&#34;Flush content from memory to HDF5 file.&#34;&#34;&#34;
+        h5_file.flush()
+        gc.collect()
+
+    @staticmethod
+    def gen_dataset_name():
+        return &#39;ds-&#39; + str(uuid.uuid4())[:8]
+
+    @staticmethod
+    def update_file_group(h5_file: h5.File, file_group: AnyStr, attr: int | AnyStr, attr_value: AnyStr | int) -&gt; None:
+        &#34;&#34;&#34;Update a file group attribute with input values.
+        :param h5_file: HDF5 file.
+        :param file_group: HDF5 file group.
+        :param attr: HDF5 group attribute in either integer or string format.
+        :param attr_value: HDF5 group attribute value in either integer or string format.
+        :return: None&#34;&#34;&#34;
+        h5_file.require_group(file_group).attrs[f&#39;{attr}&#39;] = attr_value
+        return h5_file.flush()
+
+    def set_dataset_attributes(self, h5_file: h5.File, file_group: AnyStr, file: AnyStr) -&gt; None:
+        &#34;&#34;&#34;Standard set of attributes to write per dataset.
+        :param h5_file: HDF5 file object.
+        :param file_group: HDF5 group.
+        :param file: input file from archive.
+        :return: None&#34;&#34;&#34;
+        try:
+            if isinstance(file, str):
+                file = file
+            elif isinstance(file, bytes):
+                file = file.decode(&#39;utf-8&#39;)
+            elif isinstance(file, io.BytesIO):
+                file = file.read().decode(&#39;utf-8&#39;)
+            elif isinstance(file, int):
+                file = str(file)
+
+            self.update_file_group(h5_file=h5_file, file_group=file_group,
+                                   attr=&#39;source-file-name&#39;, attr_value=file.split(&#39;/&#39;)[-1])
+            self.update_file_group(h5_file=h5_file, file_group=file_group,
+                                   attr=&#39;file-type-extension&#39;, attr_value=file.split(&#39;.&#39;)[-1])
+            self.update_file_group(h5_file=h5_file, file_group=file_group,
+                                   attr=&#39;source-root&#39;, attr_value=file.split(&#39;/&#39;)[0])
+
+            self._flush_content_to_file(h5_file=h5_file)
+        except AttributeError as ae:
+            print(f&#39;AttributeError: {ae, ae.args}&#39;)
+        except Exception as e:
+            print(f&#39;Attribute Exception: {e, e.args}&#39;)
+
+    def _process_list_depth(self, data: List) -&gt; List | None:
+        list_depth = self._parsing_processor.find_list_depth(data)
+        result: List = []
+        x = 0
+        while x &lt; list_depth:
+           for row in data:
+              result.append(self._parsing_processor.process_row(row))
+              x += 1
+        return result
+
+    def create_dataset_from_dict(self, h5_file: h5.File, data: Dict, file_group: AnyStr) -&gt; None:
+        &#34;&#34;&#34;Create a dataset from a dictionary. Dictionaries are string-ified into key:value lists. Nested dictionaries become nested lists
+        :param h5_file: HDF5 file object.
+        :param data: HDF5 dataset data in dictionary format.
+        :param file_group: HDF5 group.
+        :return: None&#34;&#34;&#34;
+        try:
+            kv_list = self._parsing_processor.parse_data(input_dict=data)
+            obj, req, d = kv_list
+            g = h5_file.require_group(file_group)
+            name = self.gen_dataset_name()
+            g.require_group(name)
+            data_str = self._process_list_depth(data=d)
+            for row in data_str:
+               if row and row != []:
+                  name = self.gen_dataset_name()
+                  g.create_dataset(name=name, data=row, shape=len(row), compression=&#39;gzip&#39;)
+                  print(f&#34;write dataset {name} in file group {file_group}&#34;)
+            self._flush_content_to_file(h5_file=h5_file)
+        except ValueError as ve:
+            print(f&#39;Dataset Dict ValueError: {ve, ve.args}&#39;)
+        except TypeError as te:
+            print(f&#39;Dataset Dict TypeError: {te, te.args}&#39;)
+        except Exception as e:
+            print(f&#39;Dataset Dict Exception: {e, e.args}&#39;)
+
+    def create_dataset_from_input(self, h5_file: h5.File, data: List | Dict | np.ndarray, file_group: AnyStr,
+                                  file: AnyStr) -&gt; None:
+        &#34;&#34;&#34;Create a dataset from a list, dictionary, or Numpy array. Applying updates to group attributes.
+        :param h5_file: HDF5 file object.
+        :param data: HDF5 dataset data in list, dictionary, or numpy array.
+        :param file_group: HDF5 group.
+        :param file: file name from input source.
+        :return: None&#34;&#34;&#34;
+        try:
+            self._flush_content_to_file(h5_file=h5_file)
+            if isinstance(data, List) and isinstance(data[0], List | np.ndarray | Dict):
+               if isinstance(data[0], Dict):
+                  self.create_dataset_from_dict(h5_file=h5_file, data=data[0], file_group=file_group)
+                  self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+               elif isinstance(data[0], np.ndarray):
+                   name = self.gen_dataset_name()
+                   g = h5_file.require_group(file_group)
+                   g.create_dataset(name=name, data=data[0], compression=&#39;gzip&#39;)
+                   print(f&#34;write dataset {name} - {file}&#34;)
+                   self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+               elif isinstance(data[0], List):
+                  data_str = self._process_list_depth(data=data)
+                  name = self.gen_dataset_name()
+                  g = h5_file.require_group(file_group)
+                  if data_str and not data_str == [[]]:
+                     g.create_dataset(name=name, data=data_str, compression=&#39;gzip&#39;)
+                     self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+                     print(f&#34;write dataset {name} - {file}&#34;)
+                  else:
+                     print(f&#34;No data to write for {file}&#34;)
+
+            elif isinstance(data, Dict):
+               self.create_dataset_from_dict(h5_file=h5_file, data=data, file_group=file_group)
+               self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+            elif isinstance(data, np.ndarray):
+               name = self.gen_dataset_name()
+               g = h5_file.require_group(file_group)
+               g.create_dataset(name=name, data=data, compression=&#39;gzip&#39;)
+               print(f&#34;write dataset {name} - {file}&#34;)
+               self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+            return self._flush_content_to_file(h5_file=h5_file)
+        except ValueError as ve:
+            print(f&#39;Dataset Input ValueError: {ve, ve.args}&#39;)
+        except TypeError as te:
+            print(f&#39;Dataset input TypeError: {te, te.args}&#39;)
+        except Exception as e:
+            print(f&#39;Dataset Input Exception: {e, e.args}&#39;)
+
+    def create_file_group(self, h5_file: h5.File, group_name: AnyStr, content_size: int = 0) -&gt; None:
+        &#34;&#34;&#34;Create a new file group in the HDF5 file.
+        :param h5_file: HDF5 file object.
+        :param group_name: New file group name.
+        :param content_size: New file group content size.
+        :return None&#34;&#34;&#34;
+        created = self._get_file_group(h5_file, group_name)
+        if not created:
+            h5_file.create_group(group_name, track_order=True)
+            h5_file[group_name].attrs[&#39;file_name&#39;] = h5_file.name
+            h5_file[group_name].attrs[&#39;schema_file&#39;] = self.__schema_file
+            h5_file[group_name].attrs[&#39;content_size&#39;] = content_size
+            print(f&#34;write group {group_name} attrs&#34;)
+            return h5_file.clear()
+
+    @staticmethod
+    def _get_file_group(h5_file: h5.File, group_name: AnyStr):
+        return h5_file.get(group_name)
+
+    def classify_inputs(self, file: AnyStr | io.BytesIO,
+                        open_file: ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                        process_q: multiprocessing.Queue, group_keys: List = None) -&gt; None:
+
+        &#34;&#34;&#34;Classify and process input file content into structured data formats. Valid inputs types are JSON, CSV,
+                        video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO.
+                        Add results to multiprocessing.Queue.
+                        :param file: Path to the input file in archive (e.g., .zip, .gz, .h5).
+                        :param open_file: ZipFile, Gzip, Tarfile, h5.File, and BytesIO object.
+                        :param process_q: multiprocessing.Queue
+                        :return: None&#34;&#34;&#34;
+        content_list: List = []
+        processed_file_list: List = []
+        image_extensions = self.__config_dict.get(&#39;image_extensions&#39;)
+        video_extensions = self.__config_dict.get(&#39;video_extensions&#39;)
+
+        if isinstance(open_file, io.BytesIO):
+            io_file = open_file.getbuffer()
+            if max(io_file.suboffsets) &gt;= 1:
+                &#34;&#34;&#34;It has PIL file properties, so convert to JPEG&#34;&#34;&#34;
+                file = open_file.name + &#39;.jpeg&#39;
+                open_file.close()
+                open_file = self._file_io_buffer(file)
+                content_list, processed_file_list = self._img_processor.convert_images(file, open_file,
+                                                                                       content_list,
+                                                                                       processed_file_list)
+        try:
+            group = group_keys[0]
+            group_content = group_keys[1]
+            file_location = group_keys[2]
+
+            if not file.endswith(&#39;/&#39;):
+                &#34;&#34;&#34; Process JSON files &#34;&#34;&#34;
+                if file.endswith(&#39;json&#39;) or file.endswith(&#39;jsonl&#39;) and (&#39;json&#39; or &#39;jsonl&#39;) in group_content:
+                    content_list, processed_file_list = self._txt_processor.process_json(file, open_file,
+                                                                          content_list, processed_file_list)
+                    if content_list and processed_file_list:
+                       processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                                   f&#34;location: {file_location}&#34;])
+                       process_q.put([content_list, processed_file_list, file])
+                    &#34;&#34;&#34; Process image files &#34;&#34;&#34;
+                elif file.split(&#39;.&#39;)[-1] in image_extensions and file.split(&#39;.&#39;)[-1] in group_content:
+                    content_list, processed_file_list = self._img_processor.convert_images(file, open_file,
+                                                                            content_list, processed_file_list)
+                    if content_list and processed_file_list:
+                        processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                                    f&#34;location: {file_location}&#34;])
+                        process_q.put([content_list, processed_file_list, file])
+                    &#34;&#34;&#34; Process CSV files &#34;&#34;&#34;
+                elif file.endswith(&#39;csv&#39;) or file.split(&#39;.&#39;)[-1] in group_content:
+                    content_list, processed_file_list = self._txt_processor.process_csv(file, open_file,
+                                                                         content_list, processed_file_list)
+                    if content_list and processed_file_list:
+                       processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                                   f&#34;location: {file_location}&#34;])
+                       process_q.put([content_list, processed_file_list, file])
+                    &#34;&#34;&#34; Process video files &#34;&#34;&#34;
+                elif file.split(&#39;.&#39;)[-1] in video_extensions or file.split(&#39;.&#39;)[-1] in group_content:
+                    content_list, processed_file_list = self._vid_processor.process_video(file, open_file,
+                                                                           content_list, processed_file_list)
+                    if content_list and processed_file_list:
+                       processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                                   f&#34;location: {file_location}&#34;])
+                       process_q.put([content_list, processed_file_list, file])
+
+        except Exception as e:
+            print(f&#39;classify_inputs Exception: {e, e.args}&#39;)
+            process_q.put(f&#34;classify_inputs Exception: {e, e.args}&#34;)
+            pass
+        finally:
+            gc.collect()
+
+    def process_content_list(self, content: List, file_group: AnyStr, h5_file: h5.File = None):
+        try:
+            for file, line in content:
+                self.create_dataset_from_input(h5_file=h5_file, data=line, file_group=file_group, file=file)
+                self._flush_content_to_file(h5_file=h5_file)
+        except Exception as e:
+            print(f&#39;process_content_list Exception: {e}&#39;)
+
+    def start_mp(self) -&gt; [multiprocessing.Queue, multiprocessing.Process]:
+        &#34;&#34;&#34; Use multiprocessing and queues for large number of files and content; requires batch limits to be set in order to control
+         the number of items in the queue and free memory on the host.
+        :return: process_q which is a multiprocessing queue, and local_mpq which is a multiprocessing process&#34;&#34;&#34;
+        try:
+            multiprocessing.process.allow_run_as_child = True
+            multiprocessing.process.allow_connection_pickling = True
+            multiprocessing.process.inherit_connections = True
+            multiprocessing.process.allow_multiprocess_child = True
+            multiprocessing.set_start_method(&#39;fork&#39;, force=True)
+            local_mpq = MpQLocal()
+            process_q = local_mpq.get_queue()
+            return process_q, local_mpq
+        except Exception as e:
+            print(f&#39;start_mp Exception: {e, e.args}&#39;)
+            process_q.put(f&#34;start_mp Exception: {e, e.args}&#34;)
+
+    def file_list(self, open_file: zipfile.ZipFile | tarfile.TarFile | gzip.GzipFile | io.BytesIO) -&gt; None | List:
+        &#34;&#34;&#34;Get a list of files from ZIP or GZIP files.&#34;&#34;&#34;
+        if isinstance(open_file, zipfile.ZipFile):
+            valid = zipfile.is_zipfile(open_file)
+            if valid:
+               file_list = open_file.namelist()
+               return file_list
+        elif isinstance(open_file, tarfile.TarFile):
+                file_list = open_file.getnames()
+                return file_list
+        elif self.__input_file.endswith(&#39;gz&#39; or &#39;gzip&#39;):
+            with gzip.open(self.__input_file, &#39;rb&#39;) as gz:
+                buff = gz.read()
+                file_list = gzip.decompress(buff).decode(&#39;utf-8&#39;)
+                return file_list
+        else:
+            return []
+
+    @staticmethod
+    def _size_batching(file_list: List, batch_size: int):
+        &#34;&#34;&#34;Compute and slice Batch file list into a specified size for processing.
+        :param file_list: List of files to process.
+        :param batch_size: Batch size.
+        :return sliced file list&#34;&#34;&#34;
+        batches = math.ceil(len(file_list) / batch_size)
+        batch_list: List = []
+        for i in range(batches):
+            start_batch = i * batch_size
+            end_batch = start_batch + batch_size - 1
+            batch_list.append(file_list[start_batch:end_batch])
+        return batch_list
+
+    def _process_batch(self,
+                       file_input: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                       file_list: List,
+                       process_q: multiprocessing.Queue, batch_process_limit: int = None,
+                       batch_chunk_size: int = None, group_keys: List = None) -&gt; None:
+        &#34;&#34;&#34;Process input files in batches calculated from __size_batching to manage memory consumption.
+        Batch limits are set in the hdfs=config.json file.
+        :param file_input can be a ZipFile, GzipFile, Tarfile, h5.File, or BytesIO object.
+        :param file_list is a list of files in file format returned by self.file_list()&#34;&#34;&#34;
+        try:
+            allowed_types = self.__config_dict.get(&#39;allowed_types&#39;)
+            if not batch_chunk_size:
+               batch_chunk_size = self.__config_dict.get(&#39;batch_chunk_size&#39;)
+            if not batch_process_limit:
+                batch_process_limit = self.__config_dict.get(&#39;batch_process_limit&#39;)
+
+            if len(file_list) == 1:
+                if self.__input_file.split(&#39;.&#39;)[-1] in allowed_types:
+                    self.classify_inputs(file_input, file_input, process_q, group_keys)
+            else:
+                batch_list = self._size_batching(file_list, batch_chunk_size)
+                file_sz = len(file_list)
+                b_counter = 0
+                f_counter = 0
+                print(f&#34;Processing {file_sz} files in batches of {batch_process_limit * batch_chunk_size} &#34;)
+                for batch in batch_list:
+                    for file in batch:
+                        if not file.endswith(&#39;/&#39;) and file.split(&#39;.&#39;)[-1] in allowed_types:
+                          f_counter += 1
+                          print(f&#34;&#34;&#34; Processing file {file}, file count {f_counter} in slice {len(batch)} of batch {b_counter} &#34;&#34;&#34;)
+                          self.classify_inputs(file, file_input, process_q, group_keys)
+                        else:
+                           print(f&#34;Skipping: {file}&#34;)
+                           continue
+                    b_counter += 1
+                    print(f&#34;&#34;&#34; Process data in {batch_process_limit * batch_chunk_size} files per batch, managing host memory consumption &#34;&#34;&#34;)
+                    print(f&#34;Batch {b_counter} of {len(batch_list)} at {datetime.now()}&#34;)
+
+                    &#34;&#34;&#34; Below when batch counter matches the process_limit, begin writing to h5 file&#34;&#34;&#34;
+                    &#34;&#34;&#34; This will clear the contents of the queue and write to the h5 file &#34;&#34;&#34;
+                    if b_counter == batch_process_limit:
+                        self.data_handler(process_q, file_group=file.split(&#39;/&#39;)[0], file_list=file_list, group_keys=group_keys)
+                        b_counter = 0
+                    elif batch_list[-1] == batch:
+                        self.data_handler(process_q, file_group=file.split(&#39;/&#39;)[0], file_list=file_list, group_keys=group_keys)
+                        b_counter = 0
+                total_batch_count = b_counter + 1
+                print(f&#34;Total batches processed: {total_batch_count}&#34;)
+                resource_check = total_batch_count % 10
+                if (str(resource_check).split(&#39;.&#39;)[-1] == 0) and (total_batch_count &gt; 0):
+                    print(f&#34;Total batches processed: {total_batch_count}&#34;)
+                    print(f&#34;Total files processed: {file_sz}&#34;)
+                    print(f&#34;Total files in queue: {process_q.qsize()}&#34;)
+                    print(f&#34;Total bytes in input file: {os.path.getsize(self.__input_file)}&#34;)
+                    print(f&#34;Total bytes in queue: {process_q.qsize() * 1024}&#34;)
+                    print(f&#34;Total bytes in input file: {os.path.getsize(self.__input_file) * 1024}&#34;)
+
+        except Exception as e:
+           print(f&#39;__process_batch Exception: {e, e.args}&#39;)
+           process_q.put(f&#34; __process_batch Exception: {e, e.args}&#34;)
+        finally:
+           gc.collect()
+
+    @staticmethod
+    def _file_io_buffer(input_file: AnyStr) -&gt; io.BytesIO:
+        &#34;&#34;&#34;Create buffer for reading bytes from a file.&#34;&#34;&#34;
+        with open(input_file, &#39;rb&#39;, buffering=(1024 * 1024 * 400)) as file:
+            bytes_content = file.read()
+            file_buffer = io.BytesIO(bytes_content)
+            return file_buffer
+
+    def input_file_type(self, process_q: multiprocessing.Queue, batch_process_limit: int, group_keys: List) -&gt; str | None:
+        &#34;&#34;&#34;Determine the type of input file accordingly. Valid input types are ZIP, HDF5, TAR, and GZIP. Send file to
+        self.__process_batch to create a sliced list of files
+        :param process_q: multiprocessing.Queue
+        :param batch_process_limit: int&#34;&#34;&#34;
+        try:
+            if self.__input_file.endswith(&#39;zip&#39; or &#39;z&#39;):
+                file_buffer = self._file_io_buffer(self.__input_file)
+                zipped = zipfile.ZipFile(file_buffer, &#39;r&#39;, allowZip64=True)
+                file_list = zipped.namelist()
+                self._process_batch(file_input=zipped, file_list=file_list, process_q=process_q,
+                                    batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+            elif self.__input_file.endswith(&#39;tar.gz&#39;) | self.__input_file.endswith(&#39;tar&#39;):
+                &#34;&#34;&#34;Provide custom buffer size for tar files to get more efficient reads.&#34;&#34;&#34;
+                with tarfile.open(self.__input_file, &#39;r&#39;, bufsize=(1024 * 1024 * 400)) as tar:
+                    file_list = self.file_list(tar)
+                    self._process_batch(file_input=tar, file_list=file_list, process_q=process_q,
+                                        batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+            elif self.__input_file.endswith(&#39;gz&#39; or &#39;gzip&#39;):
+                file_buffer = self._file_io_buffer(self.__input_file)
+                file_list = self.file_list(file_buffer)
+                self._process_batch(file_input=file_buffer, file_list=file_list, process_q=process_q,
+                                    batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+            else:
+                &#34;&#34;&#34;If input file is not a ZIP, HDF5, TAR, or GZIP file, process the entire file as a single file.&#34;&#34;&#34;
+                file_list = []
+                file_buffer = self._file_io_buffer(self.__input_file)
+                self._process_batch(file_input=file_buffer, file_list=file_list,
+                                    process_q=process_q, batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+        except Exception as e:
+            print(f&#39;_input_file_type Exception: {e, e.args}&#39;)
+            process_q.put(f&#34;_input_file_type Exception: {e, e.args}&#34;)
+        except BaseException as be:
+            print(f&#39;_input_file_type BaseException: {be, be.args}&#39;)
+            process_q.put(f&#34;_input_file_type BaseException: {be, be.args}&#34;)
+
+    def _process_schema_input(self, h5_file: h5.File, content_list: List = None) -&gt; Tuple[
+                                                                                            None | list | str, Any, Any] | None:
+        &#34;&#34;&#34; Use multiprocessing and queues for large image lists
+        :param h5_file is file object
+        :param content_list is list
+        :returns tuple containing list of files, multiprocessing.Queue, and multiprocessing.Process&#34;&#34;&#34;
+        try:
+            if os.path.exists(self.__schema_file):
+                paths = self._schema_processor.process_schema_file(h5_file, content_list)
+                process_q, local_mpq = self.start_mp()
+                process_q.get()
+                return paths, process_q, local_mpq
+            else:
+                print(&#34;No schema file found - using defaults&#34;)
+        except Exception as e:
+            print(f&#39;_process_schema_input Exception: {e}&#39;)
+            process_q.put(f&#34;_process_schema_input Exception: {e}&#34;)
+        except BaseException as be:
+            print(f&#39;_process_schema_input BaseException: {be}&#39;)
+            process_q.put(f&#34;_process_schema_input BaseException: {be}&#34;)
+
+    def process_ds_default(self, h5_file: h5.File, file_group: AnyStr, file: AnyStr, content_list: List = None) -&gt; None:
+        file_group = file_group.split(&#39;/&#39;)[-1]
+        self.create_dataset_from_input(h5_file=h5_file, data=content_list, file_group=file_group, file=file)
+        self._flush_content_to_file(h5_file=h5_file)
+
+    def data_handler(self, process_q: multiprocessing.Queue, file_group: AnyStr, file_list: AnyStr, group_keys: List = None) -&gt; None:
+        &#34;&#34;&#34;While there is content in the queue, process it and write to the HDF5 file.
+        If the queue is empty, write the schema to the HDF5 file.
+        If the queue is empty and the file list is empty, write the root attributes to the HDF5 file.
+        :param process_q: multiprocessing.Queue
+        :param file_list: list
+        :param file_group: str
+        Tuples of lists and files are returned from the queue each iteration.&#34;&#34;&#34;
+        try:
+            file_group, file_content, file_location = group_keys
+            h5_file = h5.File(self.__output_file, mode=self.__write_mode)
+            while not process_q.empty():
+               for data in process_q.get():
+                  if isinstance(data, List):
+                     &#34;&#34;&#34;data from queue should be tuples&#34;&#34;&#34;
+                     if isinstance(data[0][1], np.ndarray):
+                        file_group, content_list, file = data[0]
+                        self.process_ds_default(h5_file=h5_file, file_group=file_group,
+                                                file=file, content_list=content_list)
+                     elif (isinstance(data, List) and not isinstance(data[0][1], np.ndarray) and len(data[0]) == 3):
+                        file_group, content_list, file = data[0]
+                        file = file_group
+                        self.process_ds_default(h5_file=h5_file, file_group=file_group,
+                                                file=file, content_list=content_list)
+                     else:
+                        file_name = data[0]
+                        self.update_file_group(h5_file=h5_file, file_group=file_group,
+                                               attr=&#39;file-name&#39;, attr_value=file_name)
+                        if not isinstance(content_list, np.ndarray) and content_list and file_list and not file_group:
+                           for contents, file in content_list, file_list:
+                              for file_group, content_lines in contents:
+                                 if not self._get_file_group(h5_file=h5_file, group_name=file_group):
+                                    self.create_file_group(file_group, len(content_list))
+                                    print(&#34;write file group attrs&#34;)
+                                 elif not file_group:
+                                    file_group = &#39;root&#39;
+                                    if not self._get_file_group(h5_file=h5_file, group_name=file_group):
+                                       self.create_file_group(h5_file=h5_file, group_name=file_group,
+                                                              content_size=len(content_list))
+                                       print(&#34;write root attrs&#34;)
+                                       self.process_content_list(content=content_lines, file_group=file_group)
+                  else:
+                     print(&#34;Cannot process file fragment --&gt; No content to process&#34;)
+                     pass
+
+        except Exception as e:
+           print(f&#39;_data_handler Exception: {e, e.args}&#39;)
+           process_q.put(f&#34;_data_handler Exception: {e, e.args}&#34;)
+           pass
+        except BaseException as be:
+           print(f&#39;_data_handler BaseException: {be, be.args}&#39;)
+           process_q.put(f&#34;_data_handler BaseException: {be, be.args}&#34;)
+        finally:
+           if process_q.empty():
+              pass
+
+    def start_processors(self, group_keys: List, batch_process_limit: int = None) -&gt; h5.File.keys:
+        &#34;&#34;&#34;Start the data processing pipeline.
+        :param group_keys is list of group names
+        :param batch_process_limit is the maximum number of splits to create
+        :returns h5.File keys&#34;&#34;&#34;
+        try:
+            signal.signal(signal.SIGTERM, self.signal_handler)
+            &#34;&#34;&#34;h5 file is closed after the init of the class; open it here&#34;&#34;&#34;
+            h5_file = h5.File(self.__output_file, mode=self.__write_mode)
+            paths, process_q, local_mpq = self._process_schema_input(h5_file)
+            for gkey in group_keys:
+                key = self._schema_processor.map_schema_classifications(classification_key=gkey,
+                                                                        schema_d=self.__schema_dict)
+                if process_q.empty() and key:
+                    self._flush_content_to_file(h5_file)
+                    &#34;&#34;&#34; Close the file to avoid locking error when processing input file type.
+                    The schema write already has the file open.&#34;&#34;&#34;
+                    h5_file.close()
+                    &#34;&#34;&#34; File will be opened again below&#34;&#34;&#34;
+                    self.input_file_type(process_q=process_q, batch_process_limit=batch_process_limit, group_keys=key)
+                    &#34;&#34;&#34; flush memory content to disk &#34;&#34;&#34;
+                    h5_file.flush()
+                    &#34;&#34;&#34; flush memory content to disk &#34;&#34;&#34;
+                elif self.__input_dict:
+                    content_list = [self.__input_dict]
+                    file_list: List = []
+                    file_group = &#39;root&#39;
+                    process_q.put([file_group, content_list, file_list])
+                    self.data_handler(file_group=file_group, file_list=file_list, process_q=process_q)
+
+                &#34;&#34;&#34; Shutdown of Queue and Process &#34;&#34;&#34;
+                if process_q.empty():
+                    local_mpq.current_process.close()
+
+        except Exception as e:
+            print(f&#39;start_processor Exception: {e, e.args}&#39;)
+            process_q.put(f&#34;start_processor Exception: {e, e.args}&#34;)
+            pass
+        except BaseException as be:
+            print(f&#39;start_processor BaseException: {be, be.args}&#39;)
+            process_q.put(f&#34;start_processor BaseException: {be, be.args}&#34;)
+            pass
+        finally:
+            &#34;&#34;&#34; Open the file again to read the keys&#34;&#34;&#34;
+            h5_file = h5.File(self.__output_file, &#39;r&#39;)
+            h5_keys = h5_file.keys()
+            &#34;&#34;&#34; Close H5 file again when finished; return keys &#34;&#34;&#34;
+            h5_file.close()
+            return h5_keys
+
+    @staticmethod
+    def signal_handler(sig, frame, h5_file: h5.File) -&gt; None:
+        &#34;&#34;&#34;Handle signals sent to the process on Mac or Linux.
+        :param sig: signal
+        :param frame: frame
+        :return: None&#34;&#34;&#34;
+        print(&#39;Received signal:&#39;, sig)
+        print(&#39;Performing cleanup...&#39;)
+        # Add cleanup code here, e.g., closing files, releasing resources
+        gc.collect()
+        h5_file.flush()
+        time.sleep(1)  # Simulate cleanup
+        print(&#39;Cleanup complete. Exiting.&#39;)
+        pass</code></pre>
+</details>
+<div class="desc"><p>Initialize the H5DataProcessor class.
+:param output_file: Path to the output HDF5 file.
+:param input_file: Path to the input file (e.g., .zip, .gz, .h5, .tar, .tar.gz).
+:param input_dict: Optional dictionary or ndarray to process and store in the HDF5 file.
+:param write_mode: Optional mode to write the HDF5 file. Default is 'a' for append mode.
+:param schema_file: Optional schema file.
+:param config_file: Optional configuration file.</p></div>
+<h3>Static methods</h3>
+<dl>
+<dt id="dataWrangler.DataProcessor.gen_dataset_name"><code class="name flex">
+<span>def <span class="ident">gen_dataset_name</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def gen_dataset_name():
+    return &#39;ds-&#39; + str(uuid.uuid4())[:8]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.random_int_generator"><code class="name flex">
+<span>def <span class="ident">random_int_generator</span></span>(<span>) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def random_int_generator() -&gt; str:
+    random_int = random.randint(1, 1000000)
+    return str(random_int)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.signal_handler"><code class="name flex">
+<span>def <span class="ident">signal_handler</span></span>(<span>sig, frame, h5_file: h5py._hl.files.File) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def signal_handler(sig, frame, h5_file: h5.File) -&gt; None:
+    &#34;&#34;&#34;Handle signals sent to the process on Mac or Linux.
+    :param sig: signal
+    :param frame: frame
+    :return: None&#34;&#34;&#34;
+    print(&#39;Received signal:&#39;, sig)
+    print(&#39;Performing cleanup...&#39;)
+    # Add cleanup code here, e.g., closing files, releasing resources
+    gc.collect()
+    h5_file.flush()
+    time.sleep(1)  # Simulate cleanup
+    print(&#39;Cleanup complete. Exiting.&#39;)
+    pass</code></pre>
+</details>
+<div class="desc"><p>Handle signals sent to the process on Mac or Linux.
+:param sig: signal
+:param frame: frame
+:return: None</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.update_file_group"><code class="name flex">
+<span>def <span class="ident">update_file_group</span></span>(<span>h5_file: h5py._hl.files.File,<br>file_group: ~AnyStr,<br>attr: int | ~AnyStr,<br>attr_value: int | ~AnyStr) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def update_file_group(h5_file: h5.File, file_group: AnyStr, attr: int | AnyStr, attr_value: AnyStr | int) -&gt; None:
+    &#34;&#34;&#34;Update a file group attribute with input values.
+    :param h5_file: HDF5 file.
+    :param file_group: HDF5 file group.
+    :param attr: HDF5 group attribute in either integer or string format.
+    :param attr_value: HDF5 group attribute value in either integer or string format.
+    :return: None&#34;&#34;&#34;
+    h5_file.require_group(file_group).attrs[f&#39;{attr}&#39;] = attr_value
+    return h5_file.flush()</code></pre>
+</details>
+<div class="desc"><p>Update a file group attribute with input values.
+:param h5_file: HDF5 file.
+:param file_group: HDF5 file group.
+:param attr: HDF5 group attribute in either integer or string format.
+:param attr_value: HDF5 group attribute value in either integer or string format.
+:return: None</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="dataWrangler.DataProcessor.classify_inputs"><code class="name flex">
+<span>def <span class="ident">classify_inputs</span></span>(<span>self,<br>file: ~AnyStr | _io.BytesIO,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | _io.BytesIO,<br>process_q: <bound method BaseContext.Queue of <multiprocessing.context.DefaultContext object at 0x12d9d44a0>>,<br>group_keys: List = None) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def classify_inputs(self, file: AnyStr | io.BytesIO,
+                    open_file: ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                    process_q: multiprocessing.Queue, group_keys: List = None) -&gt; None:
+
+    &#34;&#34;&#34;Classify and process input file content into structured data formats. Valid inputs types are JSON, CSV,
+                    video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO.
+                    Add results to multiprocessing.Queue.
+                    :param file: Path to the input file in archive (e.g., .zip, .gz, .h5).
+                    :param open_file: ZipFile, Gzip, Tarfile, h5.File, and BytesIO object.
+                    :param process_q: multiprocessing.Queue
+                    :return: None&#34;&#34;&#34;
+    content_list: List = []
+    processed_file_list: List = []
+    image_extensions = self.__config_dict.get(&#39;image_extensions&#39;)
+    video_extensions = self.__config_dict.get(&#39;video_extensions&#39;)
+
+    if isinstance(open_file, io.BytesIO):
+        io_file = open_file.getbuffer()
+        if max(io_file.suboffsets) &gt;= 1:
+            &#34;&#34;&#34;It has PIL file properties, so convert to JPEG&#34;&#34;&#34;
+            file = open_file.name + &#39;.jpeg&#39;
+            open_file.close()
+            open_file = self._file_io_buffer(file)
+            content_list, processed_file_list = self._img_processor.convert_images(file, open_file,
+                                                                                   content_list,
+                                                                                   processed_file_list)
+    try:
+        group = group_keys[0]
+        group_content = group_keys[1]
+        file_location = group_keys[2]
+
+        if not file.endswith(&#39;/&#39;):
+            &#34;&#34;&#34; Process JSON files &#34;&#34;&#34;
+            if file.endswith(&#39;json&#39;) or file.endswith(&#39;jsonl&#39;) and (&#39;json&#39; or &#39;jsonl&#39;) in group_content:
+                content_list, processed_file_list = self._txt_processor.process_json(file, open_file,
+                                                                      content_list, processed_file_list)
+                if content_list and processed_file_list:
+                   processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                               f&#34;location: {file_location}&#34;])
+                   process_q.put([content_list, processed_file_list, file])
+                &#34;&#34;&#34; Process image files &#34;&#34;&#34;
+            elif file.split(&#39;.&#39;)[-1] in image_extensions and file.split(&#39;.&#39;)[-1] in group_content:
+                content_list, processed_file_list = self._img_processor.convert_images(file, open_file,
+                                                                        content_list, processed_file_list)
+                if content_list and processed_file_list:
+                    processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                                f&#34;location: {file_location}&#34;])
+                    process_q.put([content_list, processed_file_list, file])
+                &#34;&#34;&#34; Process CSV files &#34;&#34;&#34;
+            elif file.endswith(&#39;csv&#39;) or file.split(&#39;.&#39;)[-1] in group_content:
+                content_list, processed_file_list = self._txt_processor.process_csv(file, open_file,
+                                                                     content_list, processed_file_list)
+                if content_list and processed_file_list:
+                   processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                               f&#34;location: {file_location}&#34;])
+                   process_q.put([content_list, processed_file_list, file])
+                &#34;&#34;&#34; Process video files &#34;&#34;&#34;
+            elif file.split(&#39;.&#39;)[-1] in video_extensions or file.split(&#39;.&#39;)[-1] in group_content:
+                content_list, processed_file_list = self._vid_processor.process_video(file, open_file,
+                                                                       content_list, processed_file_list)
+                if content_list and processed_file_list:
+                   processed_file_list.append([f&#34;file_group: {group}&#34;,
+                                               f&#34;location: {file_location}&#34;])
+                   process_q.put([content_list, processed_file_list, file])
+
+    except Exception as e:
+        print(f&#39;classify_inputs Exception: {e, e.args}&#39;)
+        process_q.put(f&#34;classify_inputs Exception: {e, e.args}&#34;)
+        pass
+    finally:
+        gc.collect()</code></pre>
+</details>
+<div class="desc"><p>Classify and process input file content into structured data formats. Valid inputs types are JSON, CSV,
+video(MP4/MP3), and image files including PNG, JPEG, BMP, TIFF, SVG, BMP, GIF, and ICO.
+Add results to multiprocessing.Queue.
+:param file: Path to the input file in archive (e.g., .zip, .gz, .h5).
+:param open_file: ZipFile, Gzip, Tarfile, h5.File, and BytesIO object.
+:param process_q: multiprocessing.Queue
+:return: None</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.create_dataset_from_dict"><code class="name flex">
+<span>def <span class="ident">create_dataset_from_dict</span></span>(<span>self, h5_file: h5py._hl.files.File, data: Dict, file_group: ~AnyStr) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_dataset_from_dict(self, h5_file: h5.File, data: Dict, file_group: AnyStr) -&gt; None:
+    &#34;&#34;&#34;Create a dataset from a dictionary. Dictionaries are string-ified into key:value lists. Nested dictionaries become nested lists
+    :param h5_file: HDF5 file object.
+    :param data: HDF5 dataset data in dictionary format.
+    :param file_group: HDF5 group.
+    :return: None&#34;&#34;&#34;
+    try:
+        kv_list = self._parsing_processor.parse_data(input_dict=data)
+        obj, req, d = kv_list
+        g = h5_file.require_group(file_group)
+        name = self.gen_dataset_name()
+        g.require_group(name)
+        data_str = self._process_list_depth(data=d)
+        for row in data_str:
+           if row and row != []:
+              name = self.gen_dataset_name()
+              g.create_dataset(name=name, data=row, shape=len(row), compression=&#39;gzip&#39;)
+              print(f&#34;write dataset {name} in file group {file_group}&#34;)
+        self._flush_content_to_file(h5_file=h5_file)
+    except ValueError as ve:
+        print(f&#39;Dataset Dict ValueError: {ve, ve.args}&#39;)
+    except TypeError as te:
+        print(f&#39;Dataset Dict TypeError: {te, te.args}&#39;)
+    except Exception as e:
+        print(f&#39;Dataset Dict Exception: {e, e.args}&#39;)</code></pre>
+</details>
+<div class="desc"><p>Create a dataset from a dictionary. Dictionaries are string-ified into key:value lists. Nested dictionaries become nested lists
+:param h5_file: HDF5 file object.
+:param data: HDF5 dataset data in dictionary format.
+:param file_group: HDF5 group.
+:return: None</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.create_dataset_from_input"><code class="name flex">
+<span>def <span class="ident">create_dataset_from_input</span></span>(<span>self,<br>h5_file: h5py._hl.files.File,<br>data: List | Dict | numpy.ndarray,<br>file_group: ~AnyStr,<br>file: ~AnyStr) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_dataset_from_input(self, h5_file: h5.File, data: List | Dict | np.ndarray, file_group: AnyStr,
+                              file: AnyStr) -&gt; None:
+    &#34;&#34;&#34;Create a dataset from a list, dictionary, or Numpy array. Applying updates to group attributes.
+    :param h5_file: HDF5 file object.
+    :param data: HDF5 dataset data in list, dictionary, or numpy array.
+    :param file_group: HDF5 group.
+    :param file: file name from input source.
+    :return: None&#34;&#34;&#34;
+    try:
+        self._flush_content_to_file(h5_file=h5_file)
+        if isinstance(data, List) and isinstance(data[0], List | np.ndarray | Dict):
+           if isinstance(data[0], Dict):
+              self.create_dataset_from_dict(h5_file=h5_file, data=data[0], file_group=file_group)
+              self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+           elif isinstance(data[0], np.ndarray):
+               name = self.gen_dataset_name()
+               g = h5_file.require_group(file_group)
+               g.create_dataset(name=name, data=data[0], compression=&#39;gzip&#39;)
+               print(f&#34;write dataset {name} - {file}&#34;)
+               self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+           elif isinstance(data[0], List):
+              data_str = self._process_list_depth(data=data)
+              name = self.gen_dataset_name()
+              g = h5_file.require_group(file_group)
+              if data_str and not data_str == [[]]:
+                 g.create_dataset(name=name, data=data_str, compression=&#39;gzip&#39;)
+                 self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+                 print(f&#34;write dataset {name} - {file}&#34;)
+              else:
+                 print(f&#34;No data to write for {file}&#34;)
+
+        elif isinstance(data, Dict):
+           self.create_dataset_from_dict(h5_file=h5_file, data=data, file_group=file_group)
+           self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+        elif isinstance(data, np.ndarray):
+           name = self.gen_dataset_name()
+           g = h5_file.require_group(file_group)
+           g.create_dataset(name=name, data=data, compression=&#39;gzip&#39;)
+           print(f&#34;write dataset {name} - {file}&#34;)
+           self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
+
+        return self._flush_content_to_file(h5_file=h5_file)
+    except ValueError as ve:
+        print(f&#39;Dataset Input ValueError: {ve, ve.args}&#39;)
+    except TypeError as te:
+        print(f&#39;Dataset input TypeError: {te, te.args}&#39;)
+    except Exception as e:
+        print(f&#39;Dataset Input Exception: {e, e.args}&#39;)</code></pre>
+</details>
+<div class="desc"><p>Create a dataset from a list, dictionary, or Numpy array. Applying updates to group attributes.
+:param h5_file: HDF5 file object.
+:param data: HDF5 dataset data in list, dictionary, or numpy array.
+:param file_group: HDF5 group.
+:param file: file name from input source.
+:return: None</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.create_file_group"><code class="name flex">
+<span>def <span class="ident">create_file_group</span></span>(<span>self, h5_file: h5py._hl.files.File, group_name: ~AnyStr, content_size: int = 0) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_file_group(self, h5_file: h5.File, group_name: AnyStr, content_size: int = 0) -&gt; None:
+    &#34;&#34;&#34;Create a new file group in the HDF5 file.
+    :param h5_file: HDF5 file object.
+    :param group_name: New file group name.
+    :param content_size: New file group content size.
+    :return None&#34;&#34;&#34;
+    created = self._get_file_group(h5_file, group_name)
+    if not created:
+        h5_file.create_group(group_name, track_order=True)
+        h5_file[group_name].attrs[&#39;file_name&#39;] = h5_file.name
+        h5_file[group_name].attrs[&#39;schema_file&#39;] = self.__schema_file
+        h5_file[group_name].attrs[&#39;content_size&#39;] = content_size
+        print(f&#34;write group {group_name} attrs&#34;)
+        return h5_file.clear()</code></pre>
+</details>
+<div class="desc"><p>Create a new file group in the HDF5 file.
+:param h5_file: HDF5 file object.
+:param group_name: New file group name.
+:param content_size: New file group content size.
+:return None</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.data_handler"><code class="name flex">
+<span>def <span class="ident">data_handler</span></span>(<span>self,<br>process_q: <bound method BaseContext.Queue of <multiprocessing.context.DefaultContext object at 0x12d9d44a0>>,<br>file_group: ~AnyStr,<br>file_list: ~AnyStr,<br>group_keys: List = None) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def data_handler(self, process_q: multiprocessing.Queue, file_group: AnyStr, file_list: AnyStr, group_keys: List = None) -&gt; None:
+    &#34;&#34;&#34;While there is content in the queue, process it and write to the HDF5 file.
+    If the queue is empty, write the schema to the HDF5 file.
+    If the queue is empty and the file list is empty, write the root attributes to the HDF5 file.
+    :param process_q: multiprocessing.Queue
+    :param file_list: list
+    :param file_group: str
+    Tuples of lists and files are returned from the queue each iteration.&#34;&#34;&#34;
+    try:
+        file_group, file_content, file_location = group_keys
+        h5_file = h5.File(self.__output_file, mode=self.__write_mode)
+        while not process_q.empty():
+           for data in process_q.get():
+              if isinstance(data, List):
+                 &#34;&#34;&#34;data from queue should be tuples&#34;&#34;&#34;
+                 if isinstance(data[0][1], np.ndarray):
+                    file_group, content_list, file = data[0]
+                    self.process_ds_default(h5_file=h5_file, file_group=file_group,
+                                            file=file, content_list=content_list)
+                 elif (isinstance(data, List) and not isinstance(data[0][1], np.ndarray) and len(data[0]) == 3):
+                    file_group, content_list, file = data[0]
+                    file = file_group
+                    self.process_ds_default(h5_file=h5_file, file_group=file_group,
+                                            file=file, content_list=content_list)
+                 else:
+                    file_name = data[0]
+                    self.update_file_group(h5_file=h5_file, file_group=file_group,
+                                           attr=&#39;file-name&#39;, attr_value=file_name)
+                    if not isinstance(content_list, np.ndarray) and content_list and file_list and not file_group:
+                       for contents, file in content_list, file_list:
+                          for file_group, content_lines in contents:
+                             if not self._get_file_group(h5_file=h5_file, group_name=file_group):
+                                self.create_file_group(file_group, len(content_list))
+                                print(&#34;write file group attrs&#34;)
+                             elif not file_group:
+                                file_group = &#39;root&#39;
+                                if not self._get_file_group(h5_file=h5_file, group_name=file_group):
+                                   self.create_file_group(h5_file=h5_file, group_name=file_group,
+                                                          content_size=len(content_list))
+                                   print(&#34;write root attrs&#34;)
+                                   self.process_content_list(content=content_lines, file_group=file_group)
+              else:
+                 print(&#34;Cannot process file fragment --&gt; No content to process&#34;)
+                 pass
+
+    except Exception as e:
+       print(f&#39;_data_handler Exception: {e, e.args}&#39;)
+       process_q.put(f&#34;_data_handler Exception: {e, e.args}&#34;)
+       pass
+    except BaseException as be:
+       print(f&#39;_data_handler BaseException: {be, be.args}&#39;)
+       process_q.put(f&#34;_data_handler BaseException: {be, be.args}&#34;)
+    finally:
+       if process_q.empty():
+          pass</code></pre>
+</details>
+<div class="desc"><p>While there is content in the queue, process it and write to the HDF5 file.
+If the queue is empty, write the schema to the HDF5 file.
+If the queue is empty and the file list is empty, write the root attributes to the HDF5 file.
+:param process_q: multiprocessing.Queue
+:param file_list: list
+:param file_group: str
+Tuples of lists and files are returned from the queue each iteration.</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.file_list"><code class="name flex">
+<span>def <span class="ident">file_list</span></span>(<span>self,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | _io.BytesIO) ‑> List | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def file_list(self, open_file: zipfile.ZipFile | tarfile.TarFile | gzip.GzipFile | io.BytesIO) -&gt; None | List:
+    &#34;&#34;&#34;Get a list of files from ZIP or GZIP files.&#34;&#34;&#34;
+    if isinstance(open_file, zipfile.ZipFile):
+        valid = zipfile.is_zipfile(open_file)
+        if valid:
+           file_list = open_file.namelist()
+           return file_list
+    elif isinstance(open_file, tarfile.TarFile):
+            file_list = open_file.getnames()
+            return file_list
+    elif self.__input_file.endswith(&#39;gz&#39; or &#39;gzip&#39;):
+        with gzip.open(self.__input_file, &#39;rb&#39;) as gz:
+            buff = gz.read()
+            file_list = gzip.decompress(buff).decode(&#39;utf-8&#39;)
+            return file_list
+    else:
+        return []</code></pre>
+</details>
+<div class="desc"><p>Get a list of files from ZIP or GZIP files.</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.input_file_type"><code class="name flex">
+<span>def <span class="ident">input_file_type</span></span>(<span>self,<br>process_q: <bound method BaseContext.Queue of <multiprocessing.context.DefaultContext object at 0x12d9d44a0>>,<br>batch_process_limit: int,<br>group_keys: List) ‑> str | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def input_file_type(self, process_q: multiprocessing.Queue, batch_process_limit: int, group_keys: List) -&gt; str | None:
+    &#34;&#34;&#34;Determine the type of input file accordingly. Valid input types are ZIP, HDF5, TAR, and GZIP. Send file to
+    self.__process_batch to create a sliced list of files
+    :param process_q: multiprocessing.Queue
+    :param batch_process_limit: int&#34;&#34;&#34;
+    try:
+        if self.__input_file.endswith(&#39;zip&#39; or &#39;z&#39;):
+            file_buffer = self._file_io_buffer(self.__input_file)
+            zipped = zipfile.ZipFile(file_buffer, &#39;r&#39;, allowZip64=True)
+            file_list = zipped.namelist()
+            self._process_batch(file_input=zipped, file_list=file_list, process_q=process_q,
+                                batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+        elif self.__input_file.endswith(&#39;tar.gz&#39;) | self.__input_file.endswith(&#39;tar&#39;):
+            &#34;&#34;&#34;Provide custom buffer size for tar files to get more efficient reads.&#34;&#34;&#34;
+            with tarfile.open(self.__input_file, &#39;r&#39;, bufsize=(1024 * 1024 * 400)) as tar:
+                file_list = self.file_list(tar)
+                self._process_batch(file_input=tar, file_list=file_list, process_q=process_q,
+                                    batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+        elif self.__input_file.endswith(&#39;gz&#39; or &#39;gzip&#39;):
+            file_buffer = self._file_io_buffer(self.__input_file)
+            file_list = self.file_list(file_buffer)
+            self._process_batch(file_input=file_buffer, file_list=file_list, process_q=process_q,
+                                batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+        else:
+            &#34;&#34;&#34;If input file is not a ZIP, HDF5, TAR, or GZIP file, process the entire file as a single file.&#34;&#34;&#34;
+            file_list = []
+            file_buffer = self._file_io_buffer(self.__input_file)
+            self._process_batch(file_input=file_buffer, file_list=file_list,
+                                process_q=process_q, batch_process_limit=batch_process_limit, group_keys=group_keys)
+
+    except Exception as e:
+        print(f&#39;_input_file_type Exception: {e, e.args}&#39;)
+        process_q.put(f&#34;_input_file_type Exception: {e, e.args}&#34;)
+    except BaseException as be:
+        print(f&#39;_input_file_type BaseException: {be, be.args}&#39;)
+        process_q.put(f&#34;_input_file_type BaseException: {be, be.args}&#34;)</code></pre>
+</details>
+<div class="desc"><p>Determine the type of input file accordingly. Valid input types are ZIP, HDF5, TAR, and GZIP. Send file to
+self.__process_batch to create a sliced list of files
+:param process_q: multiprocessing.Queue
+:param batch_process_limit: int</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.process_content_list"><code class="name flex">
+<span>def <span class="ident">process_content_list</span></span>(<span>self, content: List, file_group: ~AnyStr, h5_file: h5py._hl.files.File = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_content_list(self, content: List, file_group: AnyStr, h5_file: h5.File = None):
+    try:
+        for file, line in content:
+            self.create_dataset_from_input(h5_file=h5_file, data=line, file_group=file_group, file=file)
+            self._flush_content_to_file(h5_file=h5_file)
+    except Exception as e:
+        print(f&#39;process_content_list Exception: {e}&#39;)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.process_ds_default"><code class="name flex">
+<span>def <span class="ident">process_ds_default</span></span>(<span>self,<br>h5_file: h5py._hl.files.File,<br>file_group: ~AnyStr,<br>file: ~AnyStr,<br>content_list: List = None) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_ds_default(self, h5_file: h5.File, file_group: AnyStr, file: AnyStr, content_list: List = None) -&gt; None:
+    file_group = file_group.split(&#39;/&#39;)[-1]
+    self.create_dataset_from_input(h5_file=h5_file, data=content_list, file_group=file_group, file=file)
+    self._flush_content_to_file(h5_file=h5_file)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.set_dataset_attributes"><code class="name flex">
+<span>def <span class="ident">set_dataset_attributes</span></span>(<span>self, h5_file: h5py._hl.files.File, file_group: ~AnyStr, file: ~AnyStr) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_dataset_attributes(self, h5_file: h5.File, file_group: AnyStr, file: AnyStr) -&gt; None:
+    &#34;&#34;&#34;Standard set of attributes to write per dataset.
+    :param h5_file: HDF5 file object.
+    :param file_group: HDF5 group.
+    :param file: input file from archive.
+    :return: None&#34;&#34;&#34;
+    try:
+        if isinstance(file, str):
+            file = file
+        elif isinstance(file, bytes):
+            file = file.decode(&#39;utf-8&#39;)
+        elif isinstance(file, io.BytesIO):
+            file = file.read().decode(&#39;utf-8&#39;)
+        elif isinstance(file, int):
+            file = str(file)
+
+        self.update_file_group(h5_file=h5_file, file_group=file_group,
+                               attr=&#39;source-file-name&#39;, attr_value=file.split(&#39;/&#39;)[-1])
+        self.update_file_group(h5_file=h5_file, file_group=file_group,
+                               attr=&#39;file-type-extension&#39;, attr_value=file.split(&#39;.&#39;)[-1])
+        self.update_file_group(h5_file=h5_file, file_group=file_group,
+                               attr=&#39;source-root&#39;, attr_value=file.split(&#39;/&#39;)[0])
+
+        self._flush_content_to_file(h5_file=h5_file)
+    except AttributeError as ae:
+        print(f&#39;AttributeError: {ae, ae.args}&#39;)
+    except Exception as e:
+        print(f&#39;Attribute Exception: {e, e.args}&#39;)</code></pre>
+</details>
+<div class="desc"><p>Standard set of attributes to write per dataset.
+:param h5_file: HDF5 file object.
+:param file_group: HDF5 group.
+:param file: input file from archive.
+:return: None</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.start_mp"><code class="name flex">
+<span>def <span class="ident">start_mp</span></span>(<span>self) ‑> [<bound method BaseContext.Queue of <multiprocessing.context.DefaultContext object at 0x12d9d44a0>>, <class 'multiprocessing.context.Process'>]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def start_mp(self) -&gt; [multiprocessing.Queue, multiprocessing.Process]:
+    &#34;&#34;&#34; Use multiprocessing and queues for large number of files and content; requires batch limits to be set in order to control
+     the number of items in the queue and free memory on the host.
+    :return: process_q which is a multiprocessing queue, and local_mpq which is a multiprocessing process&#34;&#34;&#34;
+    try:
+        multiprocessing.process.allow_run_as_child = True
+        multiprocessing.process.allow_connection_pickling = True
+        multiprocessing.process.inherit_connections = True
+        multiprocessing.process.allow_multiprocess_child = True
+        multiprocessing.set_start_method(&#39;fork&#39;, force=True)
+        local_mpq = MpQLocal()
+        process_q = local_mpq.get_queue()
+        return process_q, local_mpq
+    except Exception as e:
+        print(f&#39;start_mp Exception: {e, e.args}&#39;)
+        process_q.put(f&#34;start_mp Exception: {e, e.args}&#34;)</code></pre>
+</details>
+<div class="desc"><p>Use multiprocessing and queues for large number of files and content; requires batch limits to be set in order to control
+the number of items in the queue and free memory on the host.
+:return: process_q which is a multiprocessing queue, and local_mpq which is a multiprocessing process</p></div>
+</dd>
+<dt id="dataWrangler.DataProcessor.start_processors"><code class="name flex">
+<span>def <span class="ident">start_processors</span></span>(<span>self, group_keys: List, batch_process_limit: int = None) ‑> <function MappingHDF5.keys at 0x1062efce0></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def start_processors(self, group_keys: List, batch_process_limit: int = None) -&gt; h5.File.keys:
+    &#34;&#34;&#34;Start the data processing pipeline.
+    :param group_keys is list of group names
+    :param batch_process_limit is the maximum number of splits to create
+    :returns h5.File keys&#34;&#34;&#34;
+    try:
+        signal.signal(signal.SIGTERM, self.signal_handler)
+        &#34;&#34;&#34;h5 file is closed after the init of the class; open it here&#34;&#34;&#34;
+        h5_file = h5.File(self.__output_file, mode=self.__write_mode)
+        paths, process_q, local_mpq = self._process_schema_input(h5_file)
+        for gkey in group_keys:
+            key = self._schema_processor.map_schema_classifications(classification_key=gkey,
+                                                                    schema_d=self.__schema_dict)
+            if process_q.empty() and key:
+                self._flush_content_to_file(h5_file)
+                &#34;&#34;&#34; Close the file to avoid locking error when processing input file type.
+                The schema write already has the file open.&#34;&#34;&#34;
+                h5_file.close()
+                &#34;&#34;&#34; File will be opened again below&#34;&#34;&#34;
+                self.input_file_type(process_q=process_q, batch_process_limit=batch_process_limit, group_keys=key)
+                &#34;&#34;&#34; flush memory content to disk &#34;&#34;&#34;
+                h5_file.flush()
+                &#34;&#34;&#34; flush memory content to disk &#34;&#34;&#34;
+            elif self.__input_dict:
+                content_list = [self.__input_dict]
+                file_list: List = []
+                file_group = &#39;root&#39;
+                process_q.put([file_group, content_list, file_list])
+                self.data_handler(file_group=file_group, file_list=file_list, process_q=process_q)
+
+            &#34;&#34;&#34; Shutdown of Queue and Process &#34;&#34;&#34;
+            if process_q.empty():
+                local_mpq.current_process.close()
+
+    except Exception as e:
+        print(f&#39;start_processor Exception: {e, e.args}&#39;)
+        process_q.put(f&#34;start_processor Exception: {e, e.args}&#34;)
+        pass
+    except BaseException as be:
+        print(f&#39;start_processor BaseException: {be, be.args}&#39;)
+        process_q.put(f&#34;start_processor BaseException: {be, be.args}&#34;)
+        pass
+    finally:
+        &#34;&#34;&#34; Open the file again to read the keys&#34;&#34;&#34;
+        h5_file = h5.File(self.__output_file, &#39;r&#39;)
+        h5_keys = h5_file.keys()
+        &#34;&#34;&#34; Close H5 file again when finished; return keys &#34;&#34;&#34;
+        h5_file.close()
+        return h5_keys</code></pre>
+</details>
+<div class="desc"><p>Start the data processing pipeline.
+:param group_keys is list of group names
+:param batch_process_limit is the maximum number of splits to create
+:returns h5.File keys</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="dataWrangler.DataProcessor" href="#dataWrangler.DataProcessor">DataProcessor</a></code></h4>
+<ul class="">
+<li><code><a title="dataWrangler.DataProcessor.classify_inputs" href="#dataWrangler.DataProcessor.classify_inputs">classify_inputs</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.create_dataset_from_dict" href="#dataWrangler.DataProcessor.create_dataset_from_dict">create_dataset_from_dict</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.create_dataset_from_input" href="#dataWrangler.DataProcessor.create_dataset_from_input">create_dataset_from_input</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.create_file_group" href="#dataWrangler.DataProcessor.create_file_group">create_file_group</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.data_handler" href="#dataWrangler.DataProcessor.data_handler">data_handler</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.file_list" href="#dataWrangler.DataProcessor.file_list">file_list</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.gen_dataset_name" href="#dataWrangler.DataProcessor.gen_dataset_name">gen_dataset_name</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.input_file_type" href="#dataWrangler.DataProcessor.input_file_type">input_file_type</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.process_content_list" href="#dataWrangler.DataProcessor.process_content_list">process_content_list</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.process_ds_default" href="#dataWrangler.DataProcessor.process_ds_default">process_ds_default</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.random_int_generator" href="#dataWrangler.DataProcessor.random_int_generator">random_int_generator</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.set_dataset_attributes" href="#dataWrangler.DataProcessor.set_dataset_attributes">set_dataset_attributes</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.signal_handler" href="#dataWrangler.DataProcessor.signal_handler">signal_handler</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.start_mp" href="#dataWrangler.DataProcessor.start_mp">start_mp</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.start_processors" href="#dataWrangler.DataProcessor.start_processors">start_processors</a></code></li>
+<li><code><a title="dataWrangler.DataProcessor.update_file_group" href="#dataWrangler.DataProcessor.update_file_group">update_file_group</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+</footer>
+</body>
+</html>
