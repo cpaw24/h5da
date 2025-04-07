@@ -55,64 +55,55 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class VideoProcessor:
-        def __init__(self):
-                pass
+    def __init__(self):
+        pass
 
-        @staticmethod
-        def process_video(file: AnyStr | io.BytesIO,
-                          open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
-                          content_list: List, processed_file_list: List[str], pix_format: AnyStr = &#34;rgb24&#34;) -&gt; List[List] | None:
-                &#34;&#34;&#34;Converts MP4/MP3 video to Numpy array
-                :param pix_format:
-                :param file: Path to the input file (e.g., .zip, .gz, .h5).
-                :param open_file: ZipFile, Gzip, or h5.File object.
-                :param content_list: Content list to be processed.
-                :param processed_file_list: Processed file list to be processed.
-                :return list[content_list, processed_file_list]&#34;&#34;&#34;
-                try:
-                        import cv2
-                        frames = []
-                        if isinstance(file, str):
-                                ds = file.split(&#39;/&#39;)[0]
-                                video_data = vio.vread(file)
-                                shape = video_data.shape
-                                edges = np.zeros(shape[0:3])
-                                for i in range(shape[0]):
-                                        edges[i] = cv2.Canny(video_data[i].edges, 100, 200)
-                                edge_output = vio.vwrite(file, edges)
-                                v = vio.vread(file, num_frames=shape[0], outputdict={&#34;-pix_fmt&#34;: f&#34;{pix_format}&#34;})
-                                output_data = np.array(v.vwrite()).astype(np.uint8)
-                                content_list.append([edge_output, output_data, file])
-                                processed_file_list.append(file)
-                                return [content_list, processed_file_list]
+    @staticmethod
+    def process_video(file: AnyStr | io.BytesIO,
+                      open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
+                      content_list: List, processed_file_list: List) -&gt; Tuple[List, List] | None:
+        &#34;&#34;&#34;Converts MP4/MP3 video to Numpy array
+        :param pix_format:
+        :param file: Path to the input file (e.g., .zip, .gz, .h5).
+        :param open_file: ZipFile, Gzip, or h5.File object.
+        :param content_list: Content list to be processed.
+        :param processed_file_list: Processed file list to be processed.
+        :return list[content_list, processed_file_list]&#34;&#34;&#34;
+        try:
+            if isinstance(file, str):
+                ds = file.split(&#39;/&#39;)[0]
+                container = av.open(open_file.open(ds), buffer_size=1024 * 1024 * 10)
+                container.streams.video[0].thread_type = &#39;AUTO&#39;
+                columns = []
+                for frame in container.decode(video=0):
+                    Array = frame.to_ndarray(format=&#39;rgb24&#39;)
+                    column = Array.mean(axis=1)
+                    column = column.clip(0, 255).astype(&#39;uint8&#39;)
+                    column = column.reshape(-1, 2, 3)
+                    columns.append(column)
+                container.close()
 
-                        elif isinstance(file, io.BytesIO) and isinstance(open_file, io.BytesIO):
-                                with open_file.getbuffer() as buff_vid:
-                                        vid_arr = np.array(np.frombuffer(buff_vid, dtype=np.uint8))
-                                        with cv2.VideoCapture.retrieve(image=vid_arr, flag=0) as cap:
-                                                while cap.isOpened():
-                                                        ret, frame = cap.read()
-                                                        if not ret:
-                                                                break
-                                                        frames.append(frame)
+                all = np.hstack(columns)
+                full = Image.fromarray(all, &#39;RGB&#39;)
+                full = full.resize((1024, 768))
+                full = np.array(full)
 
-                                                        cap.release()
-                                                        final_frame = np.dstack(frames)
-                                                        content_list.append([file.name, final_frame, file])
-                                                        processed_file_list.append(file.name)
-                                                        return [content_list, processed_file_list]
+                content_list.append([ds, full, file])
+                processed_file_list.append(file)
 
-                except Exception as e:
-                        print(f&#39;process_video Exception: {e}&#39;)
+                return content_list, processed_file_list
 
-        def create_video_summary(self):
-                pass</code></pre>
+        except Exception as e:
+            print(f&#39;process_video Exception: {e}&#39;)
+
+    def create_video_summary(self):
+        pass</code></pre>
 </details>
 <div class="desc"></div>
 <h3>Static methods</h3>
 <dl>
 <dt id="videoProcessor.VideoProcessor.process_video"><code class="name flex">
-<span>def <span class="ident">process_video</span></span>(<span>file: ~AnyStr | _io.BytesIO,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | _io.BytesIO,<br>content_list: List,<br>processed_file_list: List[str],<br>pix_format: ~AnyStr = 'rgb24') ‑> List[List] | None</span>
+<span>def <span class="ident">process_video</span></span>(<span>file: ~AnyStr | _io.BytesIO,<br>open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | _io.BytesIO,<br>content_list: List,<br>processed_file_list: List) ‑> Tuple[List, List] | None</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -122,49 +113,40 @@ el.replaceWith(d);
 <pre><code class="python">@staticmethod
 def process_video(file: AnyStr | io.BytesIO,
                   open_file: zipfile.ZipFile | gzip.GzipFile | tarfile.TarFile | io.BytesIO,
-                  content_list: List, processed_file_list: List[str], pix_format: AnyStr = &#34;rgb24&#34;) -&gt; List[List] | None:
-        &#34;&#34;&#34;Converts MP4/MP3 video to Numpy array
-        :param pix_format:
-        :param file: Path to the input file (e.g., .zip, .gz, .h5).
-        :param open_file: ZipFile, Gzip, or h5.File object.
-        :param content_list: Content list to be processed.
-        :param processed_file_list: Processed file list to be processed.
-        :return list[content_list, processed_file_list]&#34;&#34;&#34;
-        try:
-                import cv2
-                frames = []
-                if isinstance(file, str):
-                        ds = file.split(&#39;/&#39;)[0]
-                        video_data = vio.vread(file)
-                        shape = video_data.shape
-                        edges = np.zeros(shape[0:3])
-                        for i in range(shape[0]):
-                                edges[i] = cv2.Canny(video_data[i].edges, 100, 200)
-                        edge_output = vio.vwrite(file, edges)
-                        v = vio.vread(file, num_frames=shape[0], outputdict={&#34;-pix_fmt&#34;: f&#34;{pix_format}&#34;})
-                        output_data = np.array(v.vwrite()).astype(np.uint8)
-                        content_list.append([edge_output, output_data, file])
-                        processed_file_list.append(file)
-                        return [content_list, processed_file_list]
+                  content_list: List, processed_file_list: List) -&gt; Tuple[List, List] | None:
+    &#34;&#34;&#34;Converts MP4/MP3 video to Numpy array
+    :param pix_format:
+    :param file: Path to the input file (e.g., .zip, .gz, .h5).
+    :param open_file: ZipFile, Gzip, or h5.File object.
+    :param content_list: Content list to be processed.
+    :param processed_file_list: Processed file list to be processed.
+    :return list[content_list, processed_file_list]&#34;&#34;&#34;
+    try:
+        if isinstance(file, str):
+            ds = file.split(&#39;/&#39;)[0]
+            container = av.open(open_file.open(ds), buffer_size=1024 * 1024 * 10)
+            container.streams.video[0].thread_type = &#39;AUTO&#39;
+            columns = []
+            for frame in container.decode(video=0):
+                Array = frame.to_ndarray(format=&#39;rgb24&#39;)
+                column = Array.mean(axis=1)
+                column = column.clip(0, 255).astype(&#39;uint8&#39;)
+                column = column.reshape(-1, 2, 3)
+                columns.append(column)
+            container.close()
 
-                elif isinstance(file, io.BytesIO) and isinstance(open_file, io.BytesIO):
-                        with open_file.getbuffer() as buff_vid:
-                                vid_arr = np.array(np.frombuffer(buff_vid, dtype=np.uint8))
-                                with cv2.VideoCapture.retrieve(image=vid_arr, flag=0) as cap:
-                                        while cap.isOpened():
-                                                ret, frame = cap.read()
-                                                if not ret:
-                                                        break
-                                                frames.append(frame)
+            all = np.hstack(columns)
+            full = Image.fromarray(all, &#39;RGB&#39;)
+            full = full.resize((1024, 768))
+            full = np.array(full)
 
-                                                cap.release()
-                                                final_frame = np.dstack(frames)
-                                                content_list.append([file.name, final_frame, file])
-                                                processed_file_list.append(file.name)
-                                                return [content_list, processed_file_list]
+            content_list.append([ds, full, file])
+            processed_file_list.append(file)
 
-        except Exception as e:
-                print(f&#39;process_video Exception: {e}&#39;)</code></pre>
+            return content_list, processed_file_list
+
+    except Exception as e:
+        print(f&#39;process_video Exception: {e}&#39;)</code></pre>
 </details>
 <div class="desc"><p>Converts MP4/MP3 video to Numpy array
 :param pix_format:
@@ -186,7 +168,7 @@ def process_video(file: AnyStr | io.BytesIO,
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create_video_summary(self):
-        pass</code></pre>
+    pass</code></pre>
 </details>
 <div class="desc"></div>
 </dd>
