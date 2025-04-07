@@ -1,5 +1,6 @@
 import logging
 import re
+import io
 from src.hdfa.processors.parsingProcessor import ParsingProcessor
 import h5rdmtoolbox as h5tbx
 from pathlib import Path
@@ -16,9 +17,17 @@ class DataRetriever:
         self.__initialize()
 
     def __initialize(self):
-        self.__h5_file_tbx = h5tbx.File(self.__file_path, 'r')
+        self.__file_buffer = self._file_io_buffer(self.__input_file)
+        self.__h5_file_tbx = h5tbx.File(self.__file_buffer.name, 'r')
         self.__logger = logging.getLogger(__name__)
         self._parse_pro = ParsingProcessor()
+
+    def _file_io_buffer(self, input_file: AnyStr) -> io.BytesIO:
+        """Create buffer for reading bytes from a file."""
+        with open(self.__input_file, 'rb', buffering=(1024 * 1024 * 250)) as file:
+            bytes_content = file.read()
+            file_buffer = io.BytesIO(bytes_content)
+            return file_buffer
 
     def recursive_retrieval(self) -> List | None:
         target: List = []

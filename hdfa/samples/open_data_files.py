@@ -6,9 +6,9 @@ from typing import List, Dict
 
 def retrieve_metadata():
     data_retriever = DataRetriever('//Volumes//ExtShield//datasets//hdfa_files//fashion-dataset_filestore.h5')
-    rdl = data_retriever.retrieve_group_list()[50:60]
-    ds = data_retriever.retrieve_dataset_list(slice_range=(50, 60))
-    sg = data_retriever.retrieve_all_group_attrs_data(slice_range=(50, 60))
+    rdl = data_retriever.retrieve_groups_list()[80:90]
+    ds = data_retriever.retrieve_all_datasets_list(slice_range=(80, 90))
+    sg = data_retriever.retrieve_all_group_attrs_data(slice_range=(80, 90))
     return rdl, ds, sg
 
 def view_data(groups: List, datasets: List, group_attrs_data: List[Dict]):
@@ -19,7 +19,7 @@ def view_data(groups: List, datasets: List, group_attrs_data: List[Dict]):
 
        for d in dsd:
           ds_name = d.name.split("/")[-1]
-          result = data_retriever.retrieve_searched_dataset(searched_dataset=ds_name)
+          result = data_retriever.retrieve_searched_dataset(searched_dataset=ds_name, target_group=g)
           dsf, group, attrs = result
           data = dsf.values[:]
           print(type(data))
@@ -42,7 +42,7 @@ def view_data(groups: List, datasets: List, group_attrs_data: List[Dict]):
 if __name__ == '__main__':
     rdl, ds, sg = retrieve_metadata()
     print(len(rdl), len(ds))
-    time.sleep(3)
+    time.sleep(1)
     print(
         "The groups in the file are: ",
         rdl,

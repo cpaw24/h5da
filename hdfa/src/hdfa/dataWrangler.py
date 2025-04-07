@@ -69,7 +69,7 @@ class DataProcessor:
 
     @classmethod
     def _create_file(cls, __output_file: AnyStr) -> h5.File:
-        """Create an HDF5 file. Using customized page size and buffer size to reduce memory usage."""
+        """Create an HDF5 file. Using customized page size and buffer size."""
         """ Set the kwargs values for the HDF5 file creation."""
         kwarg_vals = {'libver': 'latest', 'driver': 'core', 'backing_store': True, 'fs_persist': True,
                       'fs_strategy': 'page', 'fs_page_size': 65536, 'page_buf_size': 655360}
@@ -155,7 +155,6 @@ class DataProcessor:
                   name = self.gen_dataset_name()
                   g.create_dataset(name=name, data=row, shape=len(row), compression='gzip')
                   print(f"write dataset {name} in file group {file_group}")
-            self._flush_content_to_file(h5_file=h5_file)
         except ValueError as ve:
             print(f'Dataset Dict ValueError: {ve, ve.args}')
         except TypeError as te:
@@ -172,7 +171,6 @@ class DataProcessor:
         :param file: file name from input source.
         :return: None"""
         try:
-            self._flush_content_to_file(h5_file=h5_file)
             if isinstance(data, List) and isinstance(data[0], List | np.ndarray | Dict):
                if isinstance(data[0], Dict):
                   self.create_dataset_from_dict(h5_file=h5_file, data=data[0], file_group=file_group)
@@ -207,7 +205,7 @@ class DataProcessor:
                print(f"write dataset {name} - {file}")
                self.set_dataset_attributes(h5_file=h5_file, file_group=file_group, file=file)
 
-            return self._flush_content_to_file(h5_file=h5_file)
+            return None
         except ValueError as ve:
             print(f'Dataset Input ValueError: {ve, ve.args}')
         except TypeError as te:
@@ -301,7 +299,6 @@ class DataProcessor:
 
         except Exception as e:
             print(f'classify_inputs Exception: {e, e.args}')
-            process_q.put(f"classify_inputs Exception: {e, e.args}")
             pass
         finally:
             gc.collect()
@@ -310,7 +307,6 @@ class DataProcessor:
         try:
             for file, line in content:
                 self.create_dataset_from_input(h5_file=h5_file, data=line, file_group=file_group, file=file)
-                self._flush_content_to_file(h5_file=h5_file)
         except Exception as e:
             print(f'process_content_list Exception: {e}')
 
@@ -329,7 +325,6 @@ class DataProcessor:
             return process_q, local_mpq
         except Exception as e:
             print(f'start_mp Exception: {e, e.args}')
-            process_q.put(f"start_mp Exception: {e, e.args}")
 
     def file_list(self, open_file: zipfile.ZipFile | tarfile.TarFile | gzip.GzipFile | io.BytesIO) -> None | List:
         """Get a list of files from ZIP or GZIP files."""
@@ -379,30 +374,36 @@ class DataProcessor:
             if not batch_process_limit:
                 batch_process_limit = self.__config_dict.get('batch_process_limit')
 
-            if len(file_list) == 1:
+            if len(file_list) <= 2:
                 if self.__input_file.split('.')[-1] in allowed_types:
-                    self.classify_inputs(file_input, file_input, process_q, group_keys)
+                    self.classify_inputs(file_list[0], file_input, process_q, group_keys)
+                    group_keys:  List = [group_keys, file_list[0], "root"]
+                    self.data_handler(process_q, file_group=file_list[0].split('/')[0], file_list=file_list[0],
+                                      group_keys=group_keys)
             else:
                 batch_list = self._size_batching(file_list, batch_chunk_size)
                 file_sz = len(file_list)
                 b_counter = 0
                 f_counter = 0
+                sliced_counter = 0
                 print(f"Processing {file_sz} files in batches of {batch_process_limit * batch_chunk_size} ")
                 for batch in batch_list:
+                    sliced_counter += 1
                     for file in batch:
                         if not file.endswith('/') and file.split('.')[-1] in allowed_types:
                           f_counter += 1
-                          print(f""" Processing file {file}, file count {f_counter} in slice {len(batch)} of batch {b_counter} """)
+                          print(f""" Processing file {file}, file count {f_counter} in slice {sliced_counter} of batch {b_counter} """)
                           self.classify_inputs(file, file_input, process_q, group_keys)
                         else:
                            print(f"Skipping: {file}")
                            continue
                     b_counter += 1
-                    print(f""" Process data in {batch_process_limit * batch_chunk_size} files per batch, managing host memory consumption """)
-                    print(f"Batch {b_counter} of {len(batch_list)} at {datetime.now()}")
+                    print(f""" Process data in {batch_process_limit * batch_chunk_size} files per batch """)
+                    print(f"Batch {sliced_counter} of {len(batch_list)} at {datetime.now()}")
 
                     """ Below when batch counter matches the process_limit, begin writing to h5 file"""
-                    """ This will clear the contents of the queue and write to the h5 file """
+                    """ This will clear the contents of the queue and leave it empty. 
+                    This will repeat for every set of batches """
                     if b_counter == batch_process_limit:
                         self.data_handler(process_q, file_group=file.split('/')[0], file_list=file_list, group_keys=group_keys)
                         b_counter = 0
@@ -422,14 +423,13 @@ class DataProcessor:
 
         except Exception as e:
            print(f'__process_batch Exception: {e, e.args}')
-           process_q.put(f" __process_batch Exception: {e, e.args}")
         finally:
            gc.collect()
 
     @staticmethod
     def _file_io_buffer(input_file: AnyStr) -> io.BytesIO:
         """Create buffer for reading bytes from a file."""
-        with open(input_file, 'rb', buffering=(1024 * 1024 * 400)) as file:
+        with open(input_file, 'rb', buffering=(1024 * 1024 * 500)) as file:
             bytes_content = file.read()
             file_buffer = io.BytesIO(bytes_content)
             return file_buffer
@@ -461,7 +461,7 @@ class DataProcessor:
                                     batch_process_limit=batch_process_limit, group_keys=group_keys)
 
             else:
-                """If input file is not a ZIP, HDF5, TAR, or GZIP file, process the entire file as a single file."""
+                """If input file is not a ZIP, TAR, or GZIP file, process the entire file as a single file."""
                 file_list = []
                 file_buffer = self._file_io_buffer(self.__input_file)
                 self._process_batch(file_input=file_buffer, file_list=file_list,
@@ -469,10 +469,8 @@ class DataProcessor:
 
         except Exception as e:
             print(f'_input_file_type Exception: {e, e.args}')
-            process_q.put(f"_input_file_type Exception: {e, e.args}")
         except BaseException as be:
             print(f'_input_file_type BaseException: {be, be.args}')
-            process_q.put(f"_input_file_type BaseException: {be, be.args}")
 
     def _process_schema_input(self, h5_file: h5.File, content_list: List = None) -> Tuple[
 	                                                                                    None | list | str, Any, Any] | None:
@@ -490,10 +488,8 @@ class DataProcessor:
                 print("No schema file found - using defaults")
         except Exception as e:
             print(f'_process_schema_input Exception: {e}')
-            process_q.put(f"_process_schema_input Exception: {e}")
         except BaseException as be:
             print(f'_process_schema_input BaseException: {be}')
-            process_q.put(f"_process_schema_input BaseException: {be}")
 
     def process_ds_default(self, h5_file: h5.File, file_group: AnyStr, file: AnyStr, content_list: List = None) -> None:
         file_group = file_group.split('/')[-1]
@@ -509,7 +505,8 @@ class DataProcessor:
         :param file_group: str
         Tuples of lists and files are returned from the queue each iteration."""
         try:
-            file_group, file_content, file_location = group_keys
+            if len(group_keys) == 3:
+               file_group, file_content, file_location = group_keys
             h5_file = h5.File(self.__output_file, mode=self.__write_mode)
             while not process_q.empty():
                for data in process_q.get():
@@ -547,11 +544,9 @@ class DataProcessor:
 
         except Exception as e:
            print(f'_data_handler Exception: {e, e.args}')
-           process_q.put(f"_data_handler Exception: {e, e.args}")
            pass
         except BaseException as be:
            print(f'_data_handler BaseException: {be, be.args}')
-           process_q.put(f"_data_handler BaseException: {be, be.args}")
         finally:
            if process_q.empty():
               pass
@@ -567,18 +562,18 @@ class DataProcessor:
             h5_file = h5.File(self.__output_file, mode=self.__write_mode)
             paths, process_q, local_mpq = self._process_schema_input(h5_file)
             for gkey in group_keys:
-                key = self._schema_processor.map_schema_classifications(classification_key=gkey,
-                                                                        schema_d=self.__schema_dict)
+                if paths != 'No schema to process':
+                   key = self._schema_processor.map_schema_classifications(classification_key=gkey,
+                                                                           schema_d=self.__schema_dict)
+                else:
+                   key = "root"
+
                 if process_q.empty() and key:
-                    self._flush_content_to_file(h5_file)
                     """ Close the file to avoid locking error when processing input file type.
                     The schema write already has the file open."""
                     h5_file.close()
                     """ File will be opened again below"""
                     self.input_file_type(process_q=process_q, batch_process_limit=batch_process_limit, group_keys=key)
-                    """ flush memory content to disk """
-                    h5_file.flush()
-                    """ flush memory content to disk """
                 elif self.__input_dict:
                     content_list = [self.__input_dict]
                     file_list: List = []
@@ -588,15 +583,13 @@ class DataProcessor:
 
                 """ Shutdown of Queue and Process """
                 if process_q.empty():
-                    local_mpq.current_process.close()
+                    h5_file.close()
 
         except Exception as e:
             print(f'start_processor Exception: {e, e.args}')
-            process_q.put(f"start_processor Exception: {e, e.args}")
             pass
         except BaseException as be:
             print(f'start_processor BaseException: {be, be.args}')
-            process_q.put(f"start_processor BaseException: {be, be.args}")
             pass
         finally:
             """ Open the file again to read the keys"""
