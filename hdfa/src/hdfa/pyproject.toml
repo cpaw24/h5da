@@ -27,7 +27,7 @@ classifiers = [
 dependencies = [
   "numpy~=1.26.4",
   "multiprocessing",
-  "ffmpeg",
+  "av",
   "uuid",
   "io",
   "gc",

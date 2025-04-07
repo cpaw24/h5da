@@ -1,5 +1,6 @@
 numpy~=1.26.4
 multiprocessing
+av
 uuid
 io
 gc
@@ -27,4 +28,4 @@ reportlab~=4.3.0
 svglib~=1.5.1
 typing
 csv
-sk-video~=1.1.10
+scikit-video~=1.1.11
