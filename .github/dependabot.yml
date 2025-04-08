@@ -6,6 +6,6 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    directory: "hdfa/src/hdfa/hdfa.egg-info/requires.txt" # Location of package manifests
+    directory: "hdfa/requires.txt" # Location of package manifests
     schedule:
       interval: "weekly"
