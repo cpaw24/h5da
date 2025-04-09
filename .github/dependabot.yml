@@ -6,7 +6,7 @@
 version: 2
 updates:
   - package-ecosystem: pip
-    directory: "/"
+    directory: "/h5da/hdfa/src/hdfa/pyproject.toml"
     schedule:
       interval: "daily"
     commit-message:
