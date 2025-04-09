@@ -6,6 +6,8 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/hdfa/requires.txt" # Location of package manifests
+    directory: 
+    - "/h5da/hdfa/" 
+    - "/h5sa/hdfa/src/hdfa/"      # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "daily"
