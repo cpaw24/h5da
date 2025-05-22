@@ -13,6 +13,10 @@ The simple overview process is below
 
     input file --> read--> convert --> publish tuples to mp.queue --> deque --> write to HDF5
 
+The initialization of the classes does require parameters, which is not ideal. It was done this way due
+to file locking issues when reading/writing to the same HDF5 file with functions only. I would like to
+improve this in the future. The provided samples are a good reference for how to use the classes.
+
 The contained code is an attempt at creating some processing structure when dealing with HDF5 files.
 In simple terms its an I/O toolkit that reads from different file formats(zip, gzip, tar/tar.gz)
 without completely decompressing the file archive and converts specified file types(images, video,
